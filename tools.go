@@ -50,6 +50,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetGraphDefinition(client, toolCall.Args)
 	case "update_graph":
 		return s.handleUpdateGraph(client, toolCall.Args)
+	case "delete_graph":
+		return s.handleDeleteGraph(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -422,6 +424,34 @@ func (s *MCPServer) handleUpdateGraph(client *pixela.Client, args map[string]int
 		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に更新されました", graphID))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("グラフ更新に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleDeleteGraph(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	resp, err := client.DeleteGraph(username, token, graphID)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("グラフ削除に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に削除されました", graphID))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("グラフ削除に失敗しました: %s", resp.Message))
 	}
 }
 

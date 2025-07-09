@@ -292,6 +292,27 @@ func (c *Client) UpdateGraph(username, token, graphID string, req UpdateGraphReq
 	return c.parseResponse(resp)
 }
 
+func (c *Client) DeleteGraph(username, token, graphID string) (*PixelaResponse, error) {
+	httpReq, err := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s", c.BaseURL, username, graphID),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete graph: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) GetGraphs(username, token string) (*GetGraphsResponse, error) {
 	httpReq, err := http.NewRequest(
 		"GET",
