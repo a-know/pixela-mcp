@@ -205,6 +205,32 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token"},
 				},
 			},
+			{
+				"name":        "update_user",
+				"description": "Pixelaでユーザー情報を更新します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "現在の認証トークン",
+						},
+						"newToken": map[string]interface{}{
+							"type":        "string",
+							"description": "新しい認証トークン",
+						},
+						"thanksCode": map[string]interface{}{
+							"type":        "string",
+							"description": "サンクスコード（オプション）",
+						},
+					},
+					"required": []string{"username", "token", "newToken"},
+				},
+			},
 		},
 	}
 }

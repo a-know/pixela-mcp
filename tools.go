@@ -39,6 +39,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handlePostPixel(client, toolCall.Args)
 	case "delete_user":
 		return s.handleDeleteUser(client, toolCall.Args)
+	case "update_user":
+		return s.handleUpdateUser(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -210,6 +212,42 @@ func (s *MCPServer) handleDeleteUser(client *pixela.Client, args map[string]inte
 		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' が正常に削除されました", username))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ユーザー削除に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleUpdateUser(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	newToken, ok := args["newToken"].(string)
+	if !ok {
+		return s.createErrorResult("newTokenパラメータが必要です")
+	}
+
+	// thanksCodeはオプショナル
+	thanksCode, _ := args["thanksCode"].(string)
+
+	req := pixela.UpdateUserRequest{
+		NewToken:   newToken,
+		ThanksCode: thanksCode,
+	}
+
+	resp, err := client.UpdateUser(username, token, req)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ユーザー更新に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' の情報が正常に更新されました", username))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ユーザー更新に失敗しました: %s", resp.Message))
 	}
 }
 

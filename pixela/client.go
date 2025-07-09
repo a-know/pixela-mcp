@@ -43,6 +43,11 @@ type PostPixelRequest struct {
 	OptionalData string `json:"optionalData,omitempty"`
 }
 
+type UpdateUserRequest struct {
+	NewToken   string `json:"newToken"`
+	ThanksCode string `json:"thanksCode,omitempty"`
+}
+
 type PixelaResponse struct {
 	Message   string `json:"message"`
 	IsSuccess bool   `json:"isSuccess"`
@@ -145,6 +150,33 @@ func (c *Client) DeleteUser(username, token string) (*PixelaResponse, error) {
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete user: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
+func (c *Client) UpdateUser(username, token string, req UpdateUserRequest) (*PixelaResponse, error) {
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("%s/v1/users/%s", c.BaseURL, username),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 	defer resp.Body.Close()
 
