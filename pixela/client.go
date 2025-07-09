@@ -130,6 +130,27 @@ func (c *Client) PostPixel(username, token, graphID string, req PostPixelRequest
 	return c.parseResponse(resp)
 }
 
+func (c *Client) DeleteUser(username, token string) (*PixelaResponse, error) {
+	httpReq, err := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("%s/v1/users/%s", c.BaseURL, username),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete user: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) GetGraph(username, graphID string) (string, error) {
 	resp, err := c.HTTPClient.Get(fmt.Sprintf("%s/v1/users/%s/graphs/%s", c.BaseURL, username, graphID))
 	if err != nil {

@@ -37,6 +37,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleCreateGraph(client, toolCall.Args)
 	case "post_pixel":
 		return s.handlePostPixel(client, toolCall.Args)
+	case "delete_user":
+		return s.handleDeleteUser(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -179,6 +181,35 @@ func (s *MCPServer) handlePostPixel(client *pixela.Client, args map[string]inter
 		return s.createSuccessResult(fmt.Sprintf("ピクセルが正常に投稿されました (日付: %s, 数量: %s)", date, quantity))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ピクセル投稿に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleDeleteUser(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	// デバッグログを追加
+	fmt.Printf("DEBUG: Deleting user '%s' with token '%s'\n", username, token)
+
+	resp, err := client.DeleteUser(username, token)
+	if err != nil {
+		fmt.Printf("DEBUG: Error deleting user: %v\n", err)
+		return s.createErrorResult(fmt.Sprintf("ユーザー削除に失敗しました: %v", err))
+	}
+
+	fmt.Printf("DEBUG: Pixela API response: %+v\n", resp)
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' が正常に削除されました", username))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ユーザー削除に失敗しました: %s", resp.Message))
 	}
 }
 
