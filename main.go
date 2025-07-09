@@ -191,18 +191,6 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 	}
 }
 
-func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
-	// ツール呼び出しの実装は後で追加
-	return map[string]interface{}{
-		"content": []map[string]interface{}{
-			{
-				"type": "text",
-				"text": "ツール呼び出し機能は実装中です",
-			},
-		},
-	}
-}
-
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
