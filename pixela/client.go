@@ -48,6 +48,16 @@ type UpdateUserRequest struct {
 	ThanksCode string `json:"thanksCode,omitempty"`
 }
 
+type UpdateUserProfileRequest struct {
+	DisplayName string `json:"displayName,omitempty"`
+	ProfileURL  string `json:"profileURL,omitempty"`
+	Description string `json:"description,omitempty"`
+	AvatarURL   string `json:"avatarURL,omitempty"`
+	Twitter     string `json:"twitter,omitempty"`
+	GitHub      string `json:"github,omitempty"`
+	Website     string `json:"website,omitempty"`
+}
+
 type PixelaResponse struct {
 	Message   string `json:"message"`
 	IsSuccess bool   `json:"isSuccess"`
@@ -177,6 +187,33 @@ func (c *Client) UpdateUser(username, token string, req UpdateUserRequest) (*Pix
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
+func (c *Client) UpdateUserProfile(username, token string, req UpdateUserProfileRequest) (*PixelaResponse, error) {
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("%s/@%s", c.BaseURL, username),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user profile: %w", err)
 	}
 	defer resp.Body.Close()
 

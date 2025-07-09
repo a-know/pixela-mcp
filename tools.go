@@ -41,6 +41,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleDeleteUser(client, toolCall.Args)
 	case "update_user":
 		return s.handleUpdateUser(client, toolCall.Args)
+	case "update_user_profile":
+		return s.handleUpdateUserProfile(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -248,6 +250,48 @@ func (s *MCPServer) handleUpdateUser(client *pixela.Client, args map[string]inte
 		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' の情報が正常に更新されました", username))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ユーザー更新に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleUpdateUserProfile(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	// プロフィール更新のパラメータはすべてオプショナル
+	displayName, _ := args["displayName"].(string)
+	profileURL, _ := args["profileURL"].(string)
+	description, _ := args["description"].(string)
+	avatarURL, _ := args["avatarURL"].(string)
+	twitter, _ := args["twitter"].(string)
+	github, _ := args["github"].(string)
+	website, _ := args["website"].(string)
+
+	req := pixela.UpdateUserProfileRequest{
+		DisplayName: displayName,
+		ProfileURL:  profileURL,
+		Description: description,
+		AvatarURL:   avatarURL,
+		Twitter:     twitter,
+		GitHub:      github,
+		Website:     website,
+	}
+
+	resp, err := client.UpdateUserProfile(username, token, req)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ユーザープロフィール更新に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' のプロフィールが正常に更新されました", username))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ユーザープロフィール更新に失敗しました: %s", resp.Message))
 	}
 }
 

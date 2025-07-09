@@ -231,6 +231,52 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "newToken"},
 				},
 			},
+			{
+				"name":        "update_user_profile",
+				"description": "Pixelaでユーザープロフィールを更新します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"displayName": map[string]interface{}{
+							"type":        "string",
+							"description": "表示名（オプション）",
+						},
+						"profileURL": map[string]interface{}{
+							"type":        "string",
+							"description": "プロフィールURL（オプション）",
+						},
+						"description": map[string]interface{}{
+							"type":        "string",
+							"description": "プロフィール説明（オプション）",
+						},
+						"avatarURL": map[string]interface{}{
+							"type":        "string",
+							"description": "アバター画像URL（オプション）",
+						},
+						"twitter": map[string]interface{}{
+							"type":        "string",
+							"description": "Twitterユーザー名（オプション）",
+						},
+						"github": map[string]interface{}{
+							"type":        "string",
+							"description": "GitHubユーザー名（オプション）",
+						},
+						"website": map[string]interface{}{
+							"type":        "string",
+							"description": "ウェブサイトURL（オプション）",
+						},
+					},
+					"required": []string{"username", "token"},
+				},
+			},
 		},
 	}
 }
