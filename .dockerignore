@@ -1,0 +1,38 @@
+# Git関連
+.git
+.gitignore
+
+# Go関連
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+go.work
+
+# IDE関連
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# ログファイル
+*.log
+
+# 環境変数ファイル
+.env
+.env.local
+.env.*.local
+
+# テストファイル
+*_test.go
+
+# README
+README.md 

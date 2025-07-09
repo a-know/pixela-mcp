@@ -19,6 +19,8 @@ Pixela APIを操作するためのMCP（Model Context Protocol）サーバーで
 
 ### インストール
 
+#### 方法1: 直接実行
+
 1. リポジトリをクローン
 ```bash
 git clone https://github.com/a-know/pixela-mcp.git
@@ -35,12 +37,32 @@ go mod tidy
 go run .
 ```
 
+#### 方法2: Dockerを使用
+
+1. リポジトリをクローン
+```bash
+git clone https://github.com/a-know/pixela-mcp.git
+cd pixela-mcp
+```
+
+2. Docker Composeで起動
+```bash
+docker-compose up -d
+```
+
+または、Dockerfileから直接ビルド
+```bash
+docker build -t pixela-mcp .
+docker run -p 8080:8080 pixela-mcp
+```
+
 デフォルトではポート8080でサーバーが起動します。環境変数`PORT`で変更可能です。
 
 ## 使用方法
 
 ### MCPクライアントでの設定
 
+#### 直接実行の場合
 MCPクライアント（例：Cursor）で以下の設定を追加してください：
 
 ```json
@@ -49,6 +71,19 @@ MCPクライアント（例：Cursor）で以下の設定を追加してくだ�
     "pixela": {
       "command": "go",
       "args": ["run", "."],
+      "cwd": "/path/to/pixela-mcp"
+    }
+  }
+}
+```
+
+#### Dockerの場合
+```json
+{
+  "mcpServers": {
+    "pixela": {
+      "command": "docker",
+      "args": ["run", "--rm", "-p", "8080:8080", "pixela-mcp"],
       "cwd": "/path/to/pixela-mcp"
     }
   }
@@ -94,18 +129,35 @@ Pixelaでユーザーを作成します。
 
 ```
 pixela-mcp/
-├── main.go          # MCPサーバーのメインエントリーポイント
-├── tools.go         # MCPツールの実装
+├── main.go              # MCPサーバーのメインエントリーポイント
+├── tools.go             # MCPツールの実装
+├── main_test.go         # テストファイル
 ├── pixela/
-│   └── client.go    # Pixela APIクライアント
-├── go.mod           # Goモジュール定義
-└── README.md        # このファイル
+│   └── client.go        # Pixela APIクライアント
+├── go.mod               # Goモジュール定義
+├── Dockerfile           # Dockerイメージ定義
+├── docker-compose.yml   # Docker Compose設定
+├── .dockerignore        # Docker除外ファイル
+└── README.md            # このファイル
 ```
 
 ### テスト
 
 ```bash
-go test ./...
+go test -v
+```
+
+### Dockerビルド
+
+```bash
+# イメージをビルド
+docker build -t pixela-mcp .
+
+# コンテナを実行
+docker run -p 8080:8080 pixela-mcp
+
+# Docker Composeで起動
+docker-compose up -d
 ```
 
 ## ライセンス
