@@ -286,6 +286,37 @@ func (c *Client) GetGraphs(username, token string) (*GetGraphsResponse, error) {
 	return &graphsResp, nil
 }
 
+func (c *Client) GetGraphDefinition(username, token, graphID string) (*GraphDefinition, error) {
+	httpReq, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/graph-def", c.BaseURL, username, graphID),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get graph definition: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var graphDef GraphDefinition
+	if err := json.Unmarshal(body, &graphDef); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	return &graphDef, nil
+}
+
 func (c *Client) GetGraph(username, graphID string) (string, error) {
 	resp, err := c.HTTPClient.Get(fmt.Sprintf("%s/v1/users/%s/graphs/%s", c.BaseURL, username, graphID))
 	if err != nil {

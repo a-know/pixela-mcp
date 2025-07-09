@@ -46,6 +46,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleUpdateUserProfile(client, toolCall.Args)
 	case "get_graphs":
 		return s.handleGetGraphs(client, toolCall.Args)
+	case "get_graph_definition":
+		return s.handleGetGraphDefinition(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -328,6 +330,44 @@ func (s *MCPServer) handleGetGraphs(client *pixela.Client, args map[string]inter
 
 	message := fmt.Sprintf("ユーザー '%s' のグラフ一覧（%d件）:\n%s",
 		username, len(resp.Graphs), strings.Join(graphList, "\n"))
+
+	return s.createSuccessResult(message)
+}
+
+func (s *MCPServer) handleGetGraphDefinition(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	resp, err := client.GetGraphDefinition(username, token, graphID)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("グラフ定義取得に失敗しました: %v", err))
+	}
+
+	// グラフ定義の詳細情報を整形して返す
+	message := fmt.Sprintf("グラフ定義 '%s' の詳細:\n"+
+		"ID: %s\n"+
+		"名前: %s\n"+
+		"単位: %s\n"+
+		"タイプ: %s\n"+
+		"色: %s\n"+
+		"タイムゾーン: %s\n"+
+		"自己充足: %v\n"+
+		"秘密グラフ: %v\n"+
+		"オプションデータ公開: %v",
+		resp.Name, resp.ID, resp.Name, resp.Unit, resp.Type, resp.Color,
+		resp.Timezone, bool(resp.SelfSufficient), bool(resp.IsSecret), bool(resp.PublishOptionalData))
 
 	return s.createSuccessResult(message)
 }
