@@ -58,6 +58,41 @@ type UpdateUserProfileRequest struct {
 	Website     string `json:"website,omitempty"`
 }
 
+type BoolString bool
+
+func (b *BoolString) UnmarshalJSON(data []byte) error {
+	if string(data) == "true" || string(data) == "false" {
+		var boolVal bool
+		if err := json.Unmarshal(data, &boolVal); err != nil {
+			return err
+		}
+		*b = BoolString(boolVal)
+		return nil
+	}
+	var strVal string
+	if err := json.Unmarshal(data, &strVal); err != nil {
+		return err
+	}
+	*b = BoolString(strVal == "true")
+	return nil
+}
+
+type GraphDefinition struct {
+	ID                  string     `json:"id"`
+	Name                string     `json:"name"`
+	Unit                string     `json:"unit"`
+	Type                string     `json:"type"`
+	Color               string     `json:"color"`
+	Timezone            string     `json:"timezone,omitempty"`
+	SelfSufficient      BoolString `json:"selfSufficient"`
+	IsSecret            BoolString `json:"isSecret"`
+	PublishOptionalData BoolString `json:"publishOptionalData"`
+}
+
+type GetGraphsResponse struct {
+	Graphs []GraphDefinition `json:"graphs"`
+}
+
 type PixelaResponse struct {
 	Message   string `json:"message"`
 	IsSuccess bool   `json:"isSuccess"`
@@ -218,6 +253,37 @@ func (c *Client) UpdateUserProfile(username, token string, req UpdateUserProfile
 	defer resp.Body.Close()
 
 	return c.parseResponse(resp)
+}
+
+func (c *Client) GetGraphs(username, token string) (*GetGraphsResponse, error) {
+	httpReq, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v1/users/%s/graphs", c.BaseURL, username),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get graphs: %w", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	var graphsResp GetGraphsResponse
+	if err := json.Unmarshal(body, &graphsResp); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal response: %w", err)
+	}
+
+	return &graphsResp, nil
 }
 
 func (c *Client) GetGraph(username, graphID string) (string, error) {

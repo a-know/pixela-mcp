@@ -277,6 +277,24 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token"},
 				},
 			},
+			{
+				"name":        "get_graphs",
+				"description": "Pixelaでユーザーのグラフ定義一覧を取得します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+					},
+					"required": []string{"username", "token"},
+				},
+			},
 		},
 	}
 }

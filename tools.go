@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/a-know/pixela-mcp/pixela"
@@ -43,6 +44,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleUpdateUser(client, toolCall.Args)
 	case "update_user_profile":
 		return s.handleUpdateUserProfile(client, toolCall.Args)
+	case "get_graphs":
+		return s.handleGetGraphs(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -293,6 +296,40 @@ func (s *MCPServer) handleUpdateUserProfile(client *pixela.Client, args map[stri
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ユーザープロフィール更新に失敗しました: %s", resp.Message))
 	}
+}
+
+func (s *MCPServer) handleGetGraphs(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	resp, err := client.GetGraphs(username, token)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("グラフ定義一覧取得に失敗しました: %v", err))
+	}
+
+	if len(resp.Graphs) == 0 {
+		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' のグラフは見つかりませんでした", username))
+	}
+
+	// グラフ一覧を整形して返す
+	var graphList []string
+	for _, graph := range resp.Graphs {
+		graphInfo := fmt.Sprintf("ID: %s, 名前: %s, 単位: %s, タイプ: %s, 色: %s",
+			graph.ID, graph.Name, graph.Unit, graph.Type, graph.Color)
+		graphList = append(graphList, graphInfo)
+	}
+
+	message := fmt.Sprintf("ユーザー '%s' のグラフ一覧（%d件）:\n%s",
+		username, len(resp.Graphs), strings.Join(graphList, "\n"))
+
+	return s.createSuccessResult(message)
 }
 
 func (s *MCPServer) createSuccessResult(message string) map[string]interface{} {
