@@ -58,6 +58,16 @@ type UpdateUserProfileRequest struct {
 	Website     string `json:"website,omitempty"`
 }
 
+type UpdateGraphRequest struct {
+	Name                string `json:"name,omitempty"`
+	Unit                string `json:"unit,omitempty"`
+	Color               string `json:"color,omitempty"`
+	Timezone            string `json:"timezone,omitempty"`
+	SelfSufficient      string `json:"selfSufficient,omitempty"`
+	IsSecret            string `json:"isSecret,omitempty"`
+	PublishOptionalData string `json:"publishOptionalData,omitempty"`
+}
+
 type BoolString bool
 
 func (b *BoolString) UnmarshalJSON(data []byte) error {
@@ -249,6 +259,33 @@ func (c *Client) UpdateUserProfile(username, token string, req UpdateUserProfile
 	resp, err := c.HTTPClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to update user profile: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
+func (c *Client) UpdateGraph(username, token, graphID string, req UpdateGraphRequest) (*PixelaResponse, error) {
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s", c.BaseURL, username, graphID),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update graph: %w", err)
 	}
 	defer resp.Body.Close()
 

@@ -48,6 +48,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetGraphs(client, toolCall.Args)
 	case "get_graph_definition":
 		return s.handleGetGraphDefinition(client, toolCall.Args)
+	case "update_graph":
+		return s.handleUpdateGraph(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -350,36 +352,96 @@ func (s *MCPServer) handleGetGraphDefinition(client *pixela.Client, args map[str
 		return s.createErrorResult("graphIDパラメータが必要です")
 	}
 
-	resp, err := client.GetGraphDefinition(username, token, graphID)
+	graph, err := client.GetGraphDefinition(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ定義取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("グラフ定義の取得に失敗しました: %v", err))
 	}
 
-	// グラフ定義の詳細情報を整形して返す
-	message := fmt.Sprintf("グラフ定義 '%s' の詳細:\n"+
-		"ID: %s\n"+
-		"名前: %s\n"+
-		"単位: %s\n"+
-		"タイプ: %s\n"+
-		"色: %s\n"+
-		"タイムゾーン: %s\n"+
-		"自己充足: %v\n"+
-		"秘密グラフ: %v\n"+
-		"オプションデータ公開: %v",
-		resp.Name, resp.ID, resp.Name, resp.Unit, resp.Type, resp.Color,
-		resp.Timezone, bool(resp.SelfSufficient), bool(resp.IsSecret), bool(resp.PublishOptionalData))
+	graphData := map[string]interface{}{
+		"id":                  graph.ID,
+		"name":                graph.Name,
+		"unit":                graph.Unit,
+		"type":                graph.Type,
+		"color":               graph.Color,
+		"timezone":            graph.Timezone,
+		"selfSufficient":      bool(graph.SelfSufficient),
+		"isSecret":            bool(graph.IsSecret),
+		"publishOptionalData": bool(graph.PublishOptionalData),
+	}
 
-	return s.createSuccessResult(message)
+	return s.createSuccessResult(fmt.Sprintf("グラフ定義を取得しました: %s", graph.Name), graphData)
 }
 
-func (s *MCPServer) createSuccessResult(message string) map[string]interface{} {
-	return map[string]interface{}{
-		"content": []map[string]interface{}{
-			{
-				"type": "text",
-				"text": message,
-			},
+func (s *MCPServer) handleUpdateGraph(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	req := pixela.UpdateGraphRequest{}
+
+	// オプションパラメータを設定
+	if name, ok := args["name"].(string); ok {
+		req.Name = name
+	}
+	if unit, ok := args["unit"].(string); ok {
+		req.Unit = unit
+	}
+	if color, ok := args["color"].(string); ok {
+		req.Color = color
+	}
+	if timezone, ok := args["timezone"].(string); ok {
+		req.Timezone = timezone
+	}
+	if selfSufficient, ok := args["selfSufficient"].(string); ok {
+		req.SelfSufficient = selfSufficient
+	}
+	if isSecret, ok := args["isSecret"].(string); ok {
+		req.IsSecret = isSecret
+	}
+	if publishOptionalData, ok := args["publishOptionalData"].(string); ok {
+		req.PublishOptionalData = publishOptionalData
+	}
+
+	resp, err := client.UpdateGraph(username, token, graphID, req)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("グラフ更新に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に更新されました", graphID))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("グラフ更新に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {
+	content := []map[string]interface{}{
+		{
+			"type": "text",
+			"text": message,
 		},
+	}
+
+	if len(data) > 0 && data[0] != nil {
+		content = append(content, map[string]interface{}{
+			"type": "json",
+			"json": data[0],
+		})
+	}
+
+	return map[string]interface{}{
+		"content": content,
 	}
 }
 

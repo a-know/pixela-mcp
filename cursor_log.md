@@ -12,6 +12,7 @@
   - ユーザープロフィール更新（update_user_profile）
   - グラフ定義一覧取得（get_graphs）
   - 特定グラフ定義取得（get_graph_definition）
+  - グラフ定義更新（update_graph）
 - MCPサーバーのツールハンドラー・ツールリストに各機能を追加
 - Dockerfile, docker-compose.yml, README.md も整備
 
@@ -29,6 +30,46 @@
 - グラフ定義一覧取得などでAPIレスポンスの型揺れに注意（BoolString型で対応）
 - MCPサーバーのツール追加時は、ツールリスト・ハンドラー・Pixelaクライアントの3箇所を一貫して実装すること
 - Docker環境でのテスト時はポート番号の重複やコンテナ名の重複に注意
+
+---
+
+## 最新の作業内容（グラフ定義更新機能の追加）
+
+### 実装内容
+- `UpdateGraphRequest`構造体をPixelaクライアントに追加
+  - 更新可能なフィールド: `name`, `unit`, `color`, `timezone`, `selfSufficient`, `isSecret`, `publishOptionalData`
+  - すべてオプションフィールドとして定義
+- `UpdateGraph`メソッドをPixelaクライアントに実装
+  - エンドポイント: `PUT /v1/users/<username>/graphs/<graphID>`
+  - 認証トークンをヘッダーに設定
+- `handleUpdateGraph`メソッドをMCPサーバーに実装
+  - 必須パラメータ: `username`, `token`, `graphID`
+  - オプションパラメータ: 更新したいフィールドのみを指定
+  - パラメータ検証とエラーハンドリング
+- `update_graph`ツールをツールリストに追加
+  - 詳細なパラメータ説明を日本語で記載
+  - オプションパラメータの説明も含む
+
+### レスポンス形式の改善
+- `createSuccessResult`メソッドを可変長引数に対応
+  - データが不要な場合は引数を省略可能
+  - JSONデータを含むレスポンスにも対応
+
+### 機能の特徴
+- グラフ更新は作成時と異なり、一部のフィールドのみ更新可能
+- `type`フィールドは更新不可（作成時のみ設定可能）
+- オプションパラメータは指定されたもののみ更新される
+
+### テスト結果
+- テストシナリオ: ユーザー作成 → グラフ作成 → グラフ更新 → 更新確認 → ユーザー削除
+- グラフの名前、単位、色の更新が正常に動作することを確認
+- エラーハンドリングも適切に動作
+
+### 技術的な注意点
+- Pixela APIの制限: グラフ定義取得API (`GET /v1/users/<username>/graphs/<graphID>/graph-def`) はPixelaサポーター限定
+- 通常ユーザーでは25%の確率でリクエストが拒否される
+- グラフ一覧取得APIで更新内容を確認する必要がある
+- 既存の`BoolString`型により、APIレスポンスの型揺れに対応済み
 
 ---
 

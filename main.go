@@ -317,6 +317,56 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
+			{
+				"name":        "update_graph",
+				"description": "Pixelaでグラフ定義を更新します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+						"name": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフ名（オプション）",
+						},
+						"unit": map[string]interface{}{
+							"type":        "string",
+							"description": "単位（オプション）",
+						},
+						"color": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフの色（オプション）",
+						},
+						"timezone": map[string]interface{}{
+							"type":        "string",
+							"description": "タイムゾーン（オプション）",
+						},
+						"selfSufficient": map[string]interface{}{
+							"type":        "string",
+							"description": "自己充足（yes/no、オプション）",
+						},
+						"isSecret": map[string]interface{}{
+							"type":        "string",
+							"description": "秘密グラフ（yes/no、オプション）",
+						},
+						"publishOptionalData": map[string]interface{}{
+							"type":        "string",
+							"description": "オプションデータ公開（yes/no、オプション）",
+						},
+					},
+					"required": []string{"username", "token", "graphID"},
+				},
+			},
 		},
 	}
 }
