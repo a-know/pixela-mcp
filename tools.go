@@ -64,6 +64,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetLatestPixel(client, toolCall.Args)
 	case "get_today_pixel":
 		return s.handleGetTodayPixel(client, toolCall.Args)
+	case "update_pixel":
+		return s.handleUpdatePixel(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -716,6 +718,52 @@ func (s *MCPServer) handleGetTodayPixel(client *pixela.Client, args map[string]i
 	}
 
 	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の今日のPixel（日付: %s）を取得しました", graphID, pixel.Date), pixelData)
+}
+
+func (s *MCPServer) handleUpdatePixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	date, ok := args["date"].(string)
+	if !ok {
+		return s.createErrorResult("dateパラメータが必要です")
+	}
+
+	quantity, ok := args["quantity"].(string)
+	if !ok {
+		return s.createErrorResult("quantityパラメータが必要です")
+	}
+
+	req := pixela.UpdatePixelRequest{
+		Quantity: quantity,
+	}
+
+	if optionalData, ok := args["optionalData"].(string); ok && optionalData != "" {
+		req.OptionalData = optionalData
+	}
+
+	resp, err := client.UpdatePixel(username, token, graphID, date, req)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ピクセル更新に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("ピクセル（%s）が正常に更新されました", date))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ピクセル更新に失敗しました: %s", resp.Message))
+	}
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {

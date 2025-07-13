@@ -563,6 +563,40 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
+			{
+				"name":        "update_pixel",
+				"description": "Pixelaで特定のグラフの特定日付のPixelを更新します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+						"date": map[string]interface{}{
+							"type":        "string",
+							"description": "日付（yyyyMMdd形式）",
+						},
+						"quantity": map[string]interface{}{
+							"type":        "string",
+							"description": "数量",
+						},
+						"optionalData": map[string]interface{}{
+							"type":        "string",
+							"description": "オプションデータ（任意）",
+						},
+					},
+					"required": []string{"username", "token", "graphID", "date", "quantity"},
+				},
+			},
 		},
 	}
 }
