@@ -106,6 +106,18 @@ type GetPixelsResponse struct {
 	Pixels PixelList `json:"pixels"`
 }
 
+type GraphStats struct {
+	TotalPixelsCount  int         `json:"totalPixelsCount"`
+	MaxQuantity       json.Number `json:"maxQuantity"`
+	MinQuantity       json.Number `json:"minQuantity"`
+	MaxDate           string      `json:"maxDate"`
+	MinDate           string      `json:"minDate"`
+	TotalQuantity     json.Number `json:"totalQuantity"`
+	AvgQuantity       json.Number `json:"avgQuantity"`
+	TodaysQuantity    json.Number `json:"todaysQuantity"`
+	YesterdayQuantity json.Number `json:"yesterdayQuantity"`
+}
+
 type BoolString bool
 
 func (b *BoolString) UnmarshalJSON(data []byte) error {
@@ -397,6 +409,37 @@ func (c *Client) GetPixels(username, token, graphID string, from, to, withBody *
 	}
 
 	return &pixelsResp, nil
+}
+
+func (c *Client) GetGraphStats(username, token, graphID string) (*GraphStats, error) {
+	httpReq, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/stats", c.BaseURL, username, graphID),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get graph stats: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get graph stats: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var stats GraphStats
+	if err := json.NewDecoder(resp.Body).Decode(&stats); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &stats, nil
 }
 
 func (c *Client) GetGraphs(username, token string) (*GetGraphsResponse, error) {

@@ -54,6 +54,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleDeleteGraph(client, toolCall.Args)
 	case "get_pixels":
 		return s.handleGetPixels(client, toolCall.Args)
+	case "get_graph_stats":
+		return s.handleGetGraphStats(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -519,6 +521,42 @@ func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]inter
 		}
 		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' のピクセル一覧（%d件）を取得しました", graphID, len(pixelList)), pixelList)
 	}
+}
+
+func (s *MCPServer) handleGetGraphStats(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	stats, err := client.GetGraphStats(username, token, graphID)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("グラフ統計情報の取得に失敗しました: %v", err))
+	}
+
+	statsData := map[string]interface{}{
+		"totalPixelsCount":  stats.TotalPixelsCount,
+		"maxQuantity":       stats.MaxQuantity.String(),
+		"minQuantity":       stats.MinQuantity.String(),
+		"maxDate":           stats.MaxDate,
+		"minDate":           stats.MinDate,
+		"totalQuantity":     stats.TotalQuantity.String(),
+		"avgQuantity":       stats.AvgQuantity.String(),
+		"todaysQuantity":    stats.TodaysQuantity.String(),
+		"yesterdayQuantity": stats.YesterdayQuantity.String(),
+	}
+
+	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の統計情報を取得しました", graphID), statsData)
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {
