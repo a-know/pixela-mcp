@@ -124,25 +124,25 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 		"tools": []map[string]interface{}{
 			{
 				"name":        "create_user",
-				"description": "Pixelaでユーザーを作成します",
+				"description": "Create a user on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"agreeTermsOfService": map[string]interface{}{
 							"type":        "string",
-							"description": "利用規約への同意（yes/no）",
+							"description": "Agreement to the terms of service (yes/no)",
 						},
 						"notMinor": map[string]interface{}{
 							"type":        "string",
-							"description": "未成年でないことの確認（yes/no）",
+							"description": "Confirmation of not being a minor (yes/no)",
 						},
 					},
 					"required": []string{"username", "token", "agreeTermsOfService", "notMinor"},
@@ -150,37 +150,37 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "create_graph",
-				"description": "Pixelaでグラフを作成します",
+				"description": "Create a graph on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 						"name": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフ名",
+							"description": "Graph name",
 						},
 						"unit": map[string]interface{}{
 							"type":        "string",
-							"description": "単位",
+							"description": "Unit",
 						},
 						"type": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフタイプ（int/float）",
+							"description": "Graph type (int/float)",
 						},
 						"color": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフの色",
+							"description": "Graph color",
 						},
 					},
 					"required": []string{"username", "token", "graphID", "name", "unit", "type", "color"},
@@ -188,29 +188,29 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "post_pixel",
-				"description": "Pixelaにピクセルを投稿します",
+				"description": "Post a pixel to Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 						"date": map[string]interface{}{
 							"type":        "string",
-							"description": "日付（yyyyMMdd形式）",
+							"description": "Date (yyyyMMdd format)",
 						},
 						"quantity": map[string]interface{}{
 							"type":        "string",
-							"description": "数量",
+							"description": "Quantity",
 						},
 					},
 					"required": []string{"username", "token", "graphID", "date", "quantity"},
@@ -218,17 +218,17 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "delete_user",
-				"description": "Pixelaでユーザーを削除します",
+				"description": "Delete a user on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 					},
 					"required": []string{"username", "token"},
@@ -236,21 +236,21 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "update_user",
-				"description": "Pixelaでユーザー情報を更新します",
+				"description": "Update user information on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"newToken": map[string]interface{}{
 							"type":        "string",
-							"description": "新しい認証トークン",
+							"description": "New authentication token",
 						},
 					},
 					"required": []string{"username", "token", "newToken"},
@@ -258,45 +258,45 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "update_user_profile",
-				"description": "Pixelaでユーザープロフィールを更新します",
+				"description": "Update user profile on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"displayName": map[string]interface{}{
 							"type":        "string",
-							"description": "表示名",
+							"description": "Display name",
 						},
 						"gravatarIconEmail": map[string]interface{}{
 							"type":        "string",
-							"description": "Gravatarアイコン用メールアドレス",
+							"description": "Gravatar icon email address",
 						},
 						"title": map[string]interface{}{
 							"type":        "string",
-							"description": "タイトル",
+							"description": "Title",
 						},
 						"about": map[string]interface{}{
 							"type":        "string",
-							"description": "自己紹介",
+							"description": "About",
 						},
 						"pixelaGraph": map[string]interface{}{
 							"type":        "string",
-							"description": "PixelaグラフURL",
+							"description": "Pixela graph URL",
 						},
 						"timezone": map[string]interface{}{
 							"type":        "string",
-							"description": "タイムゾーン",
+							"description": "Timezone",
 						},
 						"contributeURLs": map[string]interface{}{
 							"type":        "string",
-							"description": "貢献URL（カンマ区切り）",
+							"description": "Contribute URLs (comma-separated)",
 						},
 					},
 					"required": []string{"username", "token"},
@@ -304,17 +304,17 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graphs",
-				"description": "Pixelaでグラフ一覧を取得します",
+				"description": "Get a list of graphs on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 					},
 					"required": []string{"username", "token"},
@@ -322,21 +322,21 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graph_definition",
-				"description": "Pixelaでグラフ定義を取得します",
+				"description": "Get graph definition on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -344,49 +344,49 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "update_graph",
-				"description": "Pixelaでグラフを更新します",
+				"description": "Update a graph on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 						"name": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフ名",
+							"description": "Graph name",
 						},
 						"unit": map[string]interface{}{
 							"type":        "string",
-							"description": "単位",
+							"description": "Unit",
 						},
 						"color": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフの色",
+							"description": "Graph color",
 						},
 						"purgeCacheURLs": map[string]interface{}{
 							"type":        "string",
-							"description": "キャッシュ削除URL（カンマ区切り）",
+							"description": "Purge cache URLs (comma-separated)",
 						},
 						"selfSufficient": map[string]interface{}{
 							"type":        "string",
-							"description": "自己充足（increment/decrement/none）",
+							"description": "Self-sufficient (increment/decrement/none)",
 						},
 						"isSecret": map[string]interface{}{
 							"type":        "string",
-							"description": "秘密グラフ（true/false）",
+							"description": "Is secret graph (true/false)",
 						},
 						"publishOptionalData": map[string]interface{}{
 							"type":        "string",
-							"description": "オプションデータ公開（true/false）",
+							"description": "Publish optional data (true/false)",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -394,21 +394,21 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "delete_graph",
-				"description": "Pixelaでグラフを削除します",
+				"description": "Delete a graph on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -416,33 +416,33 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_pixels",
-				"description": "Pixelaでピクセル一覧を取得します",
+				"description": "Get a list of pixels on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "認証トークン",
+							"description": "Authentication token",
 						},
 						"graphID": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフID",
+							"description": "Graph ID",
 						},
 						"from": map[string]interface{}{
 							"type":        "string",
-							"description": "開始日（yyyyMMdd形式）",
+							"description": "Start date (yyyyMMdd format)",
 						},
 						"to": map[string]interface{}{
 							"type":        "string",
-							"description": "終了日（yyyyMMdd形式）",
+							"description": "End date (yyyyMMdd format)",
 						},
 						"mode": map[string]interface{}{
 							"type":        "string",
-							"description": "モード（short/shortDetail）",
+							"description": "Mode (short/shortDetail)",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -450,13 +450,13 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graph_stats",
-				"description": "Pixelaでグラフ統計を取得します",
+				"description": "Get graph statistics on Pixela",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
 						"username": map[string]interface{}{
 							"type":        "string",
-							"description": "ユーザー名",
+							"description": "User name",
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
