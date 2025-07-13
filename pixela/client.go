@@ -858,6 +858,27 @@ func (c *Client) InvokeWebhook(username, webhookHash string) (*PixelaResponse, e
 	return c.parseResponse(resp)
 }
 
+func (c *Client) DeleteWebhook(username, token, webhookHash string) (*PixelaResponse, error) {
+	httpReq, err := http.NewRequest(
+		"DELETE",
+		fmt.Sprintf("%s/v1/users/%s/webhooks/%s", c.BaseURL, username, webhookHash),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) parseResponse(resp *http.Response) (*PixelaResponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

@@ -733,6 +733,28 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "webhookHash"},
 				},
 			},
+			{
+				"name":        "delete_webhook",
+				"description": "Pixelaで特定のWebhookを削除します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"webhookHash": map[string]interface{}{
+							"type":        "string",
+							"description": "Webhookハッシュ",
+						},
+					},
+					"required": []string{"username", "token", "webhookHash"},
+				},
+			},
 		},
 	}
 }

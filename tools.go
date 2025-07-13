@@ -78,6 +78,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetWebhooks(client, toolCall.Args)
 	case "invoke_webhook":
 		return s.handleInvokeWebhook(client, toolCall.Args)
+	case "delete_webhook":
+		return s.handleDeleteWebhook(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -966,6 +968,30 @@ func (s *MCPServer) handleInvokeWebhook(client *pixela.Client, args map[string]i
 		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' が正常に実行されました", webhookHash))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("Webhookの実行に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleDeleteWebhook(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+	webhookHash, ok := args["webhookHash"].(string)
+	if !ok {
+		return s.createErrorResult("webhookHashパラメータが必要です")
+	}
+	resp, err := client.DeleteWebhook(username, token, webhookHash)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("Webhook削除に失敗しました: %v", err))
+	}
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' が正常に削除されました", webhookHash))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("Webhook削除に失敗しました: %s", resp.Message))
 	}
 }
 
