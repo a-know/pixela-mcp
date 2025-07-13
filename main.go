@@ -623,6 +623,28 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID", "date"},
 				},
 			},
+			{
+				"name":        "increment_pixel",
+				"description": "Pixelaで特定のグラフの今日のPixelをインクリメントします（int型グラフなら+1、float型グラフなら+0.01）",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+					},
+					"required": []string{"username", "token", "graphID"},
+				},
+			},
 		},
 	}
 }
