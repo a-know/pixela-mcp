@@ -271,6 +271,37 @@ func (c *Client) BatchPostPixels(username, token, graphID string, pixels []PostP
 	return c.parseResponse(resp)
 }
 
+func (c *Client) GetPixel(username, token, graphID, date string) (*Pixel, error) {
+	httpReq, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/%s", c.BaseURL, username, graphID, date),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pixel: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get pixel: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var pixel Pixel
+	if err := json.NewDecoder(resp.Body).Decode(&pixel); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &pixel, nil
+}
+
 func (c *Client) DeleteUser(username, token string) (*PixelaResponse, error) {
 	httpReq, err := http.NewRequest(
 		"DELETE",

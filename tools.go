@@ -58,6 +58,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetGraphStats(client, toolCall.Args)
 	case "batch_post_pixels":
 		return s.handleBatchPostPixels(client, toolCall.Args)
+	case "get_pixel":
+		return s.handleGetPixel(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -605,6 +607,40 @@ func (s *MCPServer) handleBatchPostPixels(client *pixela.Client, args map[string
 	} else {
 		return s.createErrorResult(fmt.Sprintf("複数Pixel登録に失敗しました: %s", resp.Message))
 	}
+}
+
+func (s *MCPServer) handleGetPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+	date, ok := args["date"].(string)
+	if !ok {
+		return s.createErrorResult("dateパラメータが必要です")
+	}
+
+	pixel, err := client.GetPixel(username, token, graphID, date)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("Pixel取得に失敗しました: %v", err))
+	}
+
+	pixelData := map[string]interface{}{
+		"date":     pixel.Date,
+		"quantity": pixel.Quantity,
+	}
+	if pixel.OptionalData != "" {
+		pixelData["optionalData"] = pixel.OptionalData
+	}
+
+	return s.createSuccessResult(fmt.Sprintf("日付 %s のPixelを取得しました", date), pixelData)
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {
