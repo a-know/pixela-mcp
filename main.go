@@ -515,6 +515,28 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID", "date"},
 				},
 			},
+			{
+				"name":        "get_latest_pixel",
+				"description": "Pixelaで特定のグラフの最新のPixelを取得します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+					},
+					"required": []string{"username", "token", "graphID"},
+				},
+			},
 		},
 	}
 }
