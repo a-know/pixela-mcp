@@ -1,81 +1,78 @@
 # Pixela MCP Server
 
-Pixela APIを操作するためのMCP（Model Context Protocol）サーバーです。Go言語で実装されています。
+A Model Context Protocol (MCP) server for operating the Pixela API, implemented in Go.
 
-## 機能
+## Features
 
-このMCPサーバーは以下のPixela API操作をサポートしています：
+This MCP server supports the following Pixela API operations as tools:
 
-### ユーザー管理
-- **ユーザー作成** (`create_user`): Pixelaで新しいユーザーを作成
-- **ユーザー情報更新** (`update_user`): ユーザーの認証トークンやサンクスコードを更新
-- **ユーザープロフィール更新** (`update_user_profile`): ユーザーのプロフィール情報を更新
-- **ユーザー削除** (`delete_user`): ユーザーを削除
+### User Management
+- **create_user**: Create a user on Pixela
+- **update_user**: Update user authentication token
+- **update_user_profile**: Update user profile information
+- **delete_user**: Delete a user
 
-### グラフ管理
-- **グラフ作成** (`create_graph`): ユーザーのグラフを作成
-- **グラフ定義更新** (`update_graph`): グラフの定義を更新
-- **グラフ削除** (`delete_graph`): 特定のグラフを削除
-- **グラフ定義一覧取得** (`get_graphs`): ユーザーの全グラフ定義を取得
-- **特定グラフ定義取得** (`get_graph_definition`): 特定のグラフ定義を取得
+### Graph Management
+- **create_graph**: Create a graph for a user
+- **update_graph**: Update a graph definition
+- **delete_graph**: Delete a specific graph
+- **get_graphs**: Get all graph definitions for a user
+- **get_graph_definition**: Get a specific graph definition
 
-### ピクセル管理
-- **ピクセル投稿** (`post_pixel`): グラフにデータを投稿
+### Pixel Management
+- **post_pixel**: Post a pixel to a graph
+- **update_pixel**: Update a pixel
+- **delete_pixel**: Delete a pixel
+- **get_pixels**: Get a list of pixels
+- **get_pixel**: Get a specific pixel
+- **get_latest_pixel**: Get the latest pixel
+- **get_today_pixel**: Get today's pixel
+- **batch_post_pixels**: Batch post pixels
+- **increment_pixel**: Increment today's pixel
+- **decrement_pixel**: Decrement today's pixel
 
-## セットアップ
+### Webhook Management
+- **create_webhook**: Create a webhook
+- **get_webhooks**: Get a list of webhooks
+- **invoke_webhook**: Invoke a webhook
+- **delete_webhook**: Delete a webhook
 
-### 前提条件
+## Setup
 
-- Go 1.21以上
-- Pixelaアカウント（https://pixe.la/）
+### Prerequisites
 
-### インストール
+- Go 1.21 or later
+- Pixela account (https://pixe.la/)
 
-#### 方法1: 直接実行
+### Installation
 
-1. リポジトリをクローン
+#### Method 1: Run directly
+
 ```bash
 git clone https://github.com/a-know/pixela-mcp.git
 cd pixela-mcp
-```
-
-2. 依存関係をインストール
-```bash
 go mod tidy
-```
-
-3. サーバーを起動
-```bash
 go run .
 ```
 
-#### 方法2: Dockerを使用
+#### Method 2: Using Docker
 
-1. リポジトリをクローン
 ```bash
 git clone https://github.com/a-know/pixela-mcp.git
 cd pixela-mcp
-```
-
-2. Docker Composeで起動
-```bash
 docker-compose up -d
 ```
-
-または、Dockerfileから直接ビルド
+or
 ```bash
 docker build -t pixela-mcp .
-docker run -p 8080:8080 pixela-mcp
+docker run -it --rm pixela-mcp
 ```
 
-デフォルトではポート8080でサーバーが起動します。環境変数`PORT`で変更可能です。
+> **Note:** The server communicates via standard input/output (MCP protocol). It does **not** listen on a TCP port.
 
-## 使用方法
+## Usage
 
-### MCPクライアントでの設定
-
-#### 直接実行の場合
-MCPクライアント（例：Cursor）で以下の設定を追加してください：
+### MCP Client Configuration Example (for Cursor)
 
 ```json
 {
@@ -88,193 +85,150 @@ MCPクライアント（例：Cursor）で以下の設定を追加してくだ�
   }
 }
 ```
-
-#### Dockerの場合
+or for Docker:
 ```json
 {
   "mcpServers": {
     "pixela": {
       "command": "docker",
-      "args": ["run", "--rm", "-p", "8080:8080", "pixela-mcp"],
+      "args": ["run", "--rm", "pixela-mcp"],
       "cwd": "/path/to/pixela-mcp"
     }
   }
 }
 ```
 
-### 利用可能なツール
+### Available Tools & Parameters
 
-#### ユーザー管理
+（ツール名・説明・パラメータは `main.go` の `handleToolsList` 実装に完全準拠）
 
-##### create_user
-Pixelaでユーザーを作成します。
+#### User Management
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `agreeTermsOfService`: 利用規約への同意（"yes"/"no"）
-- `notMinor`: 未成年でないことの確認（"yes"/"no"）
+- **create_user**
+  - `username` (string): User name
+  - `token` (string): Authentication token
+  - `agreeTermsOfService` (string): Agreement to the terms of service ("yes"/"no")
+  - `notMinor` (string): Confirmation of not being a minor ("yes"/"no")
 
-##### update_user
-ユーザー情報を更新します。
+- **update_user**
+  - `username` (string): User name
+  - `token` (string): Current authentication token
+  - `newToken` (string): New authentication token
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 現在の認証トークン
-- `newToken`: 新しい認証トークン
-- `thanksCode`: サンクスコード（オプション）
+- **update_user_profile**
+  - `username` (string): User name
+  - `token` (string): Authentication token
+  - `displayName` (string, optional): Display name
+  - `gravatarIconEmail` (string, optional): Gravatar icon email address
+  - `title` (string, optional): Title
+  - `about` (string, optional): About
+  - `pixelaGraph` (string, optional): Pixela graph URL
+  - `timezone` (string, optional): Timezone
+  - `contributeURLs` (string, optional): Contribute URLs (comma-separated)
 
-##### update_user_profile
-ユーザープロフィールを更新します。
+- **delete_user**
+  - `username` (string): User name
+  - `token` (string): Authentication token
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `displayName`: 表示名（オプション）
-- `profileURL`: プロフィールURL（オプション）
-- `description`: プロフィール説明（オプション）
-- `avatarURL`: アバター画像URL（オプション）
-- `twitter`: Twitterユーザー名（オプション）
-- `github`: GitHubユーザー名（オプション）
-- `website`: ウェブサイトURL（オプション）
+#### Graph Management
 
-##### delete_user
-ユーザーを削除します。
+- **create_graph**
+  - `username`, `token`, `graphID`, `name`, `unit`, `type`, `color` (all string, required)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
+- **update_graph**
+  - `username`, `token`, `graphID` (required)
+  - `name`, `unit`, `color`, `purgeCacheURLs`, `selfSufficient`, `isSecret`, `publishOptionalData` (optional)
 
-#### グラフ管理
+- **delete_graph**
+  - `username`, `token`, `graphID` (all string, required)
 
-##### create_graph
-ユーザーのグラフを作成します。
+- **get_graphs**
+  - `username`, `token` (both string, required)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `graphID`: グラフID
-- `name`: グラフ名
-- `unit`: 単位
-- `type`: グラフタイプ（"int"/"float"）
-- `color`: グラフの色
+- **get_graph_definition**
+  - `username`, `token`, `graphID` (all string, required)
 
-##### update_graph
-グラフ定義を更新します。
+#### Pixel Management
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `graphID`: グラフID
-- `name`: グラフ名（オプション）
-- `unit`: 単位（オプション）
-- `color`: グラフの色（オプション）
-- `timezone`: タイムゾーン（オプション）
-- `selfSufficient`: 自己充足（"yes"/"no"、オプション）
-- `isSecret`: 秘密グラフ（"yes"/"no"、オプション）
-- `publishOptionalData`: オプションデータ公開（"yes"/"no"、オプション）
+- **post_pixel**
+  - `username`, `token`, `graphID`, `date`, `quantity` (all string, required)
 
-##### delete_graph
-特定のグラフを削除します。
+- **update_pixel**
+  - `username`, `token`, `graphID`, `date`, `quantity` (all string, required)
+  - `optionalData` (string, optional)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `graphID`: グラフID
+- **delete_pixel**
+  - `username`, `token`, `graphID`, `date` (all string, required)
 
-##### get_graphs
-ユーザーのグラフ定義一覧を取得します。
+- **get_pixels**
+  - `username`, `token`, `graphID` (required)
+  - `from`, `to`, `mode` (optional)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
+- **get_pixel**
+  - `username`, `token`, `graphID`, `date` (all string, required)
 
-##### get_graph_definition
-特定のグラフ定義を取得します。
+- **get_latest_pixel**
+  - `username`, `token`, `graphID` (all string, required)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `graphID`: グラフID
+- **get_today_pixel**
+  - `username`, `token`, `graphID` (all string, required)
 
-#### ピクセル管理
+- **batch_post_pixels**
+  - `username`, `token`, `graphID`, `pixels` (all string, required; `pixels` is JSON array)
 
-##### post_pixel
-グラフにピクセルを投稿します。
+- **increment_pixel / decrement_pixel**
+  - `username`, `token`, `graphID` (all string, required)
 
-**パラメータ:**
-- `username`: ユーザー名
-- `token`: 認証トークン
-- `graphID`: グラフID
-- `date`: 日付（yyyyMMdd形式、省略時は今日）
-- `quantity`: 数量
+#### Webhook Management
 
-## 技術仕様
+- **create_webhook**
+  - `username`, `token`, `graphID`, `type` (all string, required)
+  - `quantity` (string, optional)
 
-### Pixela API対応
-- Pixela APIの型揺れ（bool型とstring型の混在）に対応するため、カスタム型`BoolString`を実装
-- 各APIエンドポイントに対応するメソッドを実装
-- エラーハンドリングとレスポンス解析を適切に実装
+- **get_webhooks**
+  - `username`, `token` (both string, required)
 
-### MCPプロトコル対応
-- MCP 2024-11-05プロトコルバージョンに対応
-- ツールリストの動的更新に対応
-- JSON-RPC 2.0形式でのリクエスト・レスポンス処理
+- **invoke_webhook**
+  - `username`, `webhookHash` (both string, required)
 
-## 開発
+- **delete_webhook**
+  - `username`, `token`, `webhookHash` (all string, required)
 
-### プロジェクト構造
+## Technical Notes
+
+- Implements MCP protocol version `2024-11-05` (JSON-RPC 2.0 over stdio)
+- All tool definitions and parameters are dynamically listed via `tools/list`
+- Pixela API quirks (e.g., type inconsistencies) are handled internally
+- Some Pixela API features require a supporter account or may be rate-limited
+
+## Project Structure
 
 ```
 pixela-mcp/
-├── main.go              # MCPサーバーのメインエントリーポイント
-├── tools.go             # MCPツールの実装
-├── main_test.go         # テストファイル
+├── main.go              # MCP server entry point
+├── tools.go             # MCP tool implementations
+├── main_test.go         # Tests
 ├── pixela/
-│   └── client.go        # Pixela APIクライアント
-├── go.mod               # Goモジュール定義
-├── Dockerfile           # Dockerイメージ定義
-├── docker-compose.yml   # Docker Compose設定
-├── .dockerignore        # Docker除外ファイル
-├── cursor_log.md        # 開発ログ
-└── README.md            # このファイル
+│   └── client.go        # Pixela API client
+├── go.mod
+├── go.sum
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── cursor_log.md
+└── README.md
 ```
 
-### テスト
+## Testing
 
 ```bash
 go test -v
 ```
 
-### Dockerビルド
-
-```bash
-# イメージをビルド
-docker build -t pixela-mcp .
-
-# コンテナを実行
-docker run -p 8080:8080 pixela-mcp
-
-# Docker Composeで起動
-docker-compose up -d
-```
-
-## 注意事項
-
-### Pixela APIの制限
-- 一部の機能（プロフィールのSNS連携、グラフ定義取得など）はPixelaサポーター限定
-- 通常ユーザーでは25%の確率でリクエストが拒否される場合がある
-- グラフ削除は永続的な操作で、取り消しはできない
-
-### 実装上の注意点
-- グラフ更新では`type`フィールドは更新不可（作成時のみ設定可能）
-- オプションパラメータは指定されたもののみ更新される
-- APIレスポンスの型揺れに対応するため、カスタム型を使用
-
-## ライセンス
+## License
 
 MIT License
 
-## 作者
+## Author
 
 a-know (https://github.com/a-know) 
