@@ -1,19 +1,14 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
-	"fmt"
 	"log"
-	"net/http"
 	"os"
+	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
-
-type MCPServer struct {
-	router *mux.Router
-}
 
 type MCPRequest struct {
 	JSONRPC string      `json:"jsonrpc"`
@@ -35,24 +30,41 @@ type MCPError struct {
 	Data    interface{} `json:"data,omitempty"`
 }
 
+type MCPServer struct {
+	scanner *bufio.Scanner
+	writer  *bufio.Writer
+}
+
 func NewMCPServer() *MCPServer {
-	router := mux.NewRouter()
-	server := &MCPServer{router: router}
-	server.setupRoutes()
-	return server
+	return &MCPServer{
+		scanner: bufio.NewScanner(os.Stdin),
+		writer:  bufio.NewWriter(os.Stdout),
+	}
 }
 
-func (s *MCPServer) setupRoutes() {
-	s.router.HandleFunc("/", s.handleMCPRequest).Methods("POST")
-}
+func (s *MCPServer) run() {
+	for s.scanner.Scan() {
+		line := strings.TrimSpace(s.scanner.Text())
+		if line == "" {
+			continue
+		}
 
-func (s *MCPServer) handleMCPRequest(w http.ResponseWriter, r *http.Request) {
-	var req MCPRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return
+		var req MCPRequest
+		if err := json.Unmarshal([]byte(line), &req); err != nil {
+			log.Printf("Error parsing JSON: %v", err)
+			continue
+		}
+
+		response := s.handleRequest(req)
+		s.sendResponse(response)
 	}
 
+	if err := s.scanner.Err(); err != nil {
+		log.Printf("Error reading stdin: %v", err)
+	}
+}
+
+func (s *MCPServer) handleRequest(req MCPRequest) MCPResponse {
 	var response MCPResponse
 	response.JSONRPC = "2.0"
 	response.ID = req.ID
@@ -71,8 +83,25 @@ func (s *MCPServer) handleMCPRequest(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	return response
+}
+
+func (s *MCPServer) sendResponse(response MCPResponse) {
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("Error marshaling response: %v", err)
+		return
+	}
+
+	_, err = s.writer.WriteString(string(responseBytes) + "\n")
+	if err != nil {
+		log.Printf("Error writing response: %v", err)
+		return
+	}
+
+	if err := s.writer.Flush(); err != nil {
+		log.Printf("Error flushing response: %v", err)
+	}
 }
 
 func (s *MCPServer) handleInitialize(params interface{}) map[string]interface{} {
@@ -217,15 +246,11 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 						},
 						"token": map[string]interface{}{
 							"type":        "string",
-							"description": "現在の認証トークン",
+							"description": "認証トークン",
 						},
 						"newToken": map[string]interface{}{
 							"type":        "string",
 							"description": "新しい認証トークン",
-						},
-						"thanksCode": map[string]interface{}{
-							"type":        "string",
-							"description": "サンクスコード（オプション）",
 						},
 					},
 					"required": []string{"username", "token", "newToken"},
@@ -247,31 +272,31 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 						},
 						"displayName": map[string]interface{}{
 							"type":        "string",
-							"description": "表示名（オプション）",
+							"description": "表示名",
 						},
-						"profileURL": map[string]interface{}{
+						"gravatarIconEmail": map[string]interface{}{
 							"type":        "string",
-							"description": "プロフィールURL（オプション）",
+							"description": "Gravatarアイコン用メールアドレス",
 						},
-						"description": map[string]interface{}{
+						"title": map[string]interface{}{
 							"type":        "string",
-							"description": "プロフィール説明（オプション）",
+							"description": "タイトル",
 						},
-						"avatarURL": map[string]interface{}{
+						"about": map[string]interface{}{
 							"type":        "string",
-							"description": "アバター画像URL（オプション）",
+							"description": "自己紹介",
 						},
-						"twitter": map[string]interface{}{
+						"pixelaGraph": map[string]interface{}{
 							"type":        "string",
-							"description": "Twitterユーザー名（オプション）",
+							"description": "PixelaグラフURL",
 						},
-						"github": map[string]interface{}{
+						"timezone": map[string]interface{}{
 							"type":        "string",
-							"description": "GitHubユーザー名（オプション）",
+							"description": "タイムゾーン",
 						},
-						"website": map[string]interface{}{
+						"contributeURLs": map[string]interface{}{
 							"type":        "string",
-							"description": "ウェブサイトURL（オプション）",
+							"description": "貢献URL（カンマ区切り）",
 						},
 					},
 					"required": []string{"username", "token"},
@@ -279,7 +304,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graphs",
-				"description": "Pixelaでユーザーのグラフ定義一覧を取得します",
+				"description": "Pixelaでグラフ一覧を取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -297,7 +322,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graph_definition",
-				"description": "Pixelaで特定のグラフ定義を取得します",
+				"description": "Pixelaでグラフ定義を取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -319,7 +344,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "update_graph",
-				"description": "Pixelaでグラフ定義を更新します",
+				"description": "Pixelaでグラフを更新します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -337,31 +362,31 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 						},
 						"name": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフ名（オプション）",
+							"description": "グラフ名",
 						},
 						"unit": map[string]interface{}{
 							"type":        "string",
-							"description": "単位（オプション）",
+							"description": "単位",
 						},
 						"color": map[string]interface{}{
 							"type":        "string",
-							"description": "グラフの色（オプション）",
+							"description": "グラフの色",
 						},
-						"timezone": map[string]interface{}{
+						"purgeCacheURLs": map[string]interface{}{
 							"type":        "string",
-							"description": "タイムゾーン（オプション）",
+							"description": "キャッシュ削除URL（カンマ区切り）",
 						},
 						"selfSufficient": map[string]interface{}{
 							"type":        "string",
-							"description": "自己充足（yes/no、オプション）",
+							"description": "自己充足（increment/decrement/none）",
 						},
 						"isSecret": map[string]interface{}{
 							"type":        "string",
-							"description": "秘密グラフ（yes/no、オプション）",
+							"description": "秘密グラフ（true/false）",
 						},
 						"publishOptionalData": map[string]interface{}{
 							"type":        "string",
-							"description": "オプションデータ公開（yes/no、オプション）",
+							"description": "オプションデータ公開（true/false）",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -369,7 +394,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "delete_graph",
-				"description": "Pixelaで特定のグラフを削除します",
+				"description": "Pixelaでグラフを削除します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -391,7 +416,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_pixels",
-				"description": "Pixelaで特定のグラフのピクセル一覧を取得します",
+				"description": "Pixelaでピクセル一覧を取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -409,15 +434,15 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 						},
 						"from": map[string]interface{}{
 							"type":        "string",
-							"description": "取得開始日（yyyyMMdd、オプション）",
+							"description": "開始日（yyyyMMdd形式）",
 						},
 						"to": map[string]interface{}{
 							"type":        "string",
-							"description": "取得終了日（yyyyMMdd、オプション）",
+							"description": "終了日（yyyyMMdd形式）",
 						},
-						"withBody": map[string]interface{}{
+						"mode": map[string]interface{}{
 							"type":        "string",
-							"description": "ピクセル詳細情報も含めるか（\"true\"/\"false\"、オプション）",
+							"description": "モード（short/shortDetail）",
 						},
 					},
 					"required": []string{"username", "token", "graphID"},
@@ -425,7 +450,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_graph_stats",
-				"description": "Pixelaで特定のグラフの統計情報を取得します（数値はグラフのtypeに応じてintまたはfloatで返されます）",
+				"description": "Pixelaでグラフ統計を取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -447,7 +472,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "batch_post_pixels",
-				"description": "Pixelaで特定のグラフに複数のPixelを一度に登録します（Pixelaサポーター限定API。通常ユーザーは25%の確率でリクエストが拒否されます）",
+				"description": "Pixelaでピクセルを一括投稿します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -464,26 +489,8 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 							"description": "グラフID",
 						},
 						"pixels": map[string]interface{}{
-							"type":        "array",
-							"description": "登録するPixelの配列（各要素はdate, quantity, optionalData）",
-							"items": map[string]interface{}{
-								"type": "object",
-								"properties": map[string]interface{}{
-									"date": map[string]interface{}{
-										"type":        "string",
-										"description": "日付（yyyyMMdd形式）",
-									},
-									"quantity": map[string]interface{}{
-										"type":        "string",
-										"description": "数量",
-									},
-									"optionalData": map[string]interface{}{
-										"type":        "string",
-										"description": "オプションデータ（任意）",
-									},
-								},
-								"required": []string{"date", "quantity"},
-							},
+							"type":        "string",
+							"description": "ピクセルデータ（JSON形式）",
 						},
 					},
 					"required": []string{"username", "token", "graphID", "pixels"},
@@ -491,7 +498,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_pixel",
-				"description": "Pixelaで特定のグラフの特定日付のPixelを取得します",
+				"description": "Pixelaで特定のピクセルを取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -517,7 +524,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_latest_pixel",
-				"description": "Pixelaで特定のグラフの最新のPixelを取得します",
+				"description": "Pixelaで最新のピクセルを取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -539,7 +546,7 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 			},
 			{
 				"name":        "get_today_pixel",
-				"description": "Pixelaで特定のグラフの今日のPixelを取得します",
+				"description": "Pixelaで今日のピクセルを取得します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -555,17 +562,13 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 							"type":        "string",
 							"description": "グラフID",
 						},
-						"returnEmpty": map[string]interface{}{
-							"type":        "string",
-							"description": "今日のPixelが存在しない場合に空のレスポンスを返すか（\"true\"/\"false\"、オプション）",
-						},
 					},
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
 			{
 				"name":        "update_pixel",
-				"description": "Pixelaで特定のグラフの特定日付のPixelを更新します",
+				"description": "Pixelaでピクセルを更新します",
 				"inputSchema": map[string]interface{}{
 					"type": "object",
 					"properties": map[string]interface{}{
@@ -765,12 +768,5 @@ func main() {
 	}
 
 	server := NewMCPServer()
-
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	fmt.Printf("Pixela MCP Server starting on port %s\n", port)
-	log.Fatal(http.ListenAndServe(":"+port, server.router))
+	server.run()
 }

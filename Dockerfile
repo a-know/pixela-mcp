@@ -19,16 +19,13 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 # 実行ステージ
 FROM alpine:latest
 
-# ca-certificatesとwgetをインストール（HTTPS通信とヘルスチェックのため）
-RUN apk --no-cache add ca-certificates wget
+# ca-certificatesをインストール（HTTPS通信のため）
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /root/
 
 # ビルドステージからバイナリをコピー
 COPY --from=builder /app/main .
-
-# ポート8080を公開
-EXPOSE 8080
 
 # アプリケーションを実行
 CMD ["./main"] 

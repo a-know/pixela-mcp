@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "pixela": {
+      "command": "docker",
+      "args": [
+        "run",
+        "--rm",
+        "-p",
+        "8081:8080",
+        "pixela-mcp-pixela-mcp:latest"
+      ]
+    }
+  }
+} 

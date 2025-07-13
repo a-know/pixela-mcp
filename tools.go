@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -19,69 +18,77 @@ type ToolCallResult struct {
 }
 
 func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
-	paramsBytes, err := json.Marshal(params)
-	if err != nil {
-		return s.createErrorResult("パラメータの解析に失敗しました")
+	// パラメータをマップに変換
+	paramsMap, ok := params.(map[string]interface{})
+	if !ok {
+		return s.createErrorResult("Invalid parameters")
 	}
 
-	var toolCall ToolCallParams
-	if err := json.Unmarshal(paramsBytes, &toolCall); err != nil {
-		return s.createErrorResult("ツール呼び出しパラメータの解析に失敗しました")
+	// ツール名を取得
+	toolName, ok := paramsMap["name"].(string)
+	if !ok {
+		return s.createErrorResult("Tool name not found")
+	}
+
+	// ツールの引数を取得
+	arguments, ok := paramsMap["arguments"].(map[string]interface{})
+	if !ok {
+		return s.createErrorResult("Arguments not found")
 	}
 
 	client := pixela.NewClient()
 
-	switch toolCall.Name {
+	switch toolName {
 	case "create_user":
-		return s.handleCreateUser(client, toolCall.Args)
+		return s.handleCreateUser(client, arguments)
 	case "create_graph":
-		return s.handleCreateGraph(client, toolCall.Args)
+		return s.handleCreateGraph(client, arguments)
 	case "post_pixel":
-		return s.handlePostPixel(client, toolCall.Args)
+		return s.handlePostPixel(client, arguments)
 	case "delete_user":
-		return s.handleDeleteUser(client, toolCall.Args)
+		return s.handleDeleteUser(client, arguments)
 	case "update_user":
-		return s.handleUpdateUser(client, toolCall.Args)
+		return s.handleUpdateUser(client, arguments)
 	case "update_user_profile":
-		return s.handleUpdateUserProfile(client, toolCall.Args)
+		return s.handleUpdateUserProfile(client, arguments)
 	case "get_graphs":
-		return s.handleGetGraphs(client, toolCall.Args)
+		return s.handleGetGraphs(client, arguments)
 	case "get_graph_definition":
-		return s.handleGetGraphDefinition(client, toolCall.Args)
+		return s.handleGetGraphDefinition(client, arguments)
 	case "update_graph":
-		return s.handleUpdateGraph(client, toolCall.Args)
+		return s.handleUpdateGraph(client, arguments)
 	case "delete_graph":
-		return s.handleDeleteGraph(client, toolCall.Args)
+		return s.handleDeleteGraph(client, arguments)
 	case "get_pixels":
-		return s.handleGetPixels(client, toolCall.Args)
+		return s.handleGetPixels(client, arguments)
 	case "get_graph_stats":
-		return s.handleGetGraphStats(client, toolCall.Args)
+		return s.handleGetGraphStats(client, arguments)
 	case "batch_post_pixels":
-		return s.handleBatchPostPixels(client, toolCall.Args)
+		return s.handleBatchPostPixels(client, arguments)
 	case "get_pixel":
-		return s.handleGetPixel(client, toolCall.Args)
+		return s.handleGetPixel(client, arguments)
 	case "get_latest_pixel":
-		return s.handleGetLatestPixel(client, toolCall.Args)
+		return s.handleGetLatestPixel(client, arguments)
 	case "get_today_pixel":
-		return s.handleGetTodayPixel(client, toolCall.Args)
+		return s.handleGetTodayPixel(client, arguments)
 	case "update_pixel":
-		return s.handleUpdatePixel(client, toolCall.Args)
+		return s.handleUpdatePixel(client, arguments)
 	case "delete_pixel":
-		return s.handleDeletePixel(client, toolCall.Args)
+		return s.handleDeletePixel(client, arguments)
 	case "increment_pixel":
-		return s.handleIncrementPixel(client, toolCall.Args)
+		return s.handleIncrementPixel(client, arguments)
 	case "decrement_pixel":
-		return s.handleDecrementPixel(client, toolCall.Args)
+		return s.handleDecrementPixel(client, arguments)
 	case "create_webhook":
-		return s.handleCreateWebhook(client, toolCall.Args)
+		return s.handleCreateWebhook(client, arguments)
 	case "get_webhooks":
-		return s.handleGetWebhooks(client, toolCall.Args)
+		return s.handleGetWebhooks(client, arguments)
 	case "invoke_webhook":
-		return s.handleInvokeWebhook(client, toolCall.Args)
+		return s.handleInvokeWebhook(client, arguments)
 	case "delete_webhook":
-		return s.handleDeleteWebhook(client, toolCall.Args)
+		return s.handleDeleteWebhook(client, arguments)
 	default:
-		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
+		return s.createErrorResult(fmt.Sprintf("Unknown tool: %s", toolName))
 	}
 }
 
