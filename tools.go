@@ -72,6 +72,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleIncrementPixel(client, toolCall.Args)
 	case "decrement_pixel":
 		return s.handleDecrementPixel(client, toolCall.Args)
+	case "create_webhook":
+		return s.handleCreateWebhook(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -859,6 +861,53 @@ func (s *MCPServer) handleDecrementPixel(client *pixela.Client, args map[string]
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ピクセルデクリメントに失敗しました: %s", resp.Message))
 	}
+}
+
+func (s *MCPServer) handleCreateWebhook(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	webhookType, ok := args["type"].(string)
+	if !ok {
+		return s.createErrorResult("typeパラメータが必要です")
+	}
+
+	req := pixela.CreateWebhookRequest{
+		GraphID: graphID,
+		Type:    webhookType,
+	}
+
+	if quantity, ok := args["quantity"].(string); ok && quantity != "" {
+		req.Quantity = quantity
+	}
+
+	webhook, err := client.CreateWebhook(username, token, req)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("Webhook作成に失敗しました: %v", err))
+	}
+
+	webhookData := map[string]interface{}{
+		"webhookHash": webhook.WebhookHash,
+		"graphID":     webhook.GraphID,
+		"type":        webhook.Type,
+	}
+	if webhook.Quantity != "" {
+		webhookData["quantity"] = webhook.Quantity
+	}
+
+	return s.createSuccessResult(fmt.Sprintf("Webhookが正常に作成されました（webhookHash: %s）", webhook.WebhookHash), webhookData)
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {

@@ -667,6 +667,36 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
+			{
+				"name":        "create_webhook",
+				"description": "PixelaでWebhookを新規作成します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+						"type": map[string]interface{}{
+							"type":        "string",
+							"description": "Webhookタイプ（increment/decrement）",
+						},
+						"quantity": map[string]interface{}{
+							"type":        "string",
+							"description": "数量（オプション）",
+						},
+					},
+					"required": []string{"username", "token", "graphID", "type"},
+				},
+			},
 		},
 	}
 }

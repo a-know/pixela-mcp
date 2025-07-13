@@ -49,6 +49,23 @@ type UpdatePixelRequest struct {
 	OptionalData string `json:"optionalData,omitempty"`
 }
 
+type CreateWebhookRequest struct {
+	GraphID  string `json:"graphID"`
+	Type     string `json:"type"`
+	Quantity string `json:"quantity,omitempty"`
+}
+
+type Webhook struct {
+	WebhookHash string `json:"webhookHash"`
+	GraphID     string `json:"graphID"`
+	Type        string `json:"type"`
+	Quantity    string `json:"quantity,omitempty"`
+}
+
+type GetWebhooksResponse struct {
+	Webhooks []Webhook `json:"webhooks"`
+}
+
 type UpdateUserRequest struct {
 	NewToken   string `json:"newToken"`
 	ThanksCode string `json:"thanksCode,omitempty"`
@@ -492,6 +509,43 @@ func (c *Client) DecrementPixel(username, token, graphID string) (*PixelaRespons
 	defer resp.Body.Close()
 
 	return c.parseResponse(resp)
+}
+
+func (c *Client) CreateWebhook(username, token string, req CreateWebhookRequest) (*Webhook, error) {
+	jsonData, err := json.Marshal(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/v1/users/%s/webhooks", c.BaseURL, username),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to create webhook: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var webhook Webhook
+	if err := json.NewDecoder(resp.Body).Decode(&webhook); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &webhook, nil
 }
 
 func (c *Client) UpdateUser(username, token string, req UpdateUserRequest) (*PixelaResponse, error) {
