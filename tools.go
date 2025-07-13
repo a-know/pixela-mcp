@@ -56,6 +56,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetPixels(client, toolCall.Args)
 	case "get_graph_stats":
 		return s.handleGetGraphStats(client, toolCall.Args)
+	case "batch_post_pixels":
+		return s.handleBatchPostPixels(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -557,6 +559,52 @@ func (s *MCPServer) handleGetGraphStats(client *pixela.Client, args map[string]i
 	}
 
 	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の統計情報を取得しました", graphID), statsData)
+}
+
+func (s *MCPServer) handleBatchPostPixels(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+	pixelsRaw, ok := args["pixels"].([]interface{})
+	if !ok || len(pixelsRaw) == 0 {
+		return s.createErrorResult("pixels配列パラメータが必要です")
+	}
+	var pixels []pixela.PostPixelRequest
+	for _, p := range pixelsRaw {
+		m, ok := p.(map[string]interface{})
+		if !ok {
+			return s.createErrorResult("pixels配列の要素が不正です")
+		}
+		date, _ := m["date"].(string)
+		quantity, _ := m["quantity"].(string)
+		optionalData, _ := m["optionalData"].(string)
+		if date == "" || quantity == "" {
+			return s.createErrorResult("pixels配列の各要素にはdate, quantityが必要です")
+		}
+		pixels = append(pixels, pixela.PostPixelRequest{
+			Date:         date,
+			Quantity:     quantity,
+			OptionalData: optionalData,
+		})
+	}
+	resp, err := client.BatchPostPixels(username, token, graphID, pixels)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("複数Pixel登録に失敗しました: %v", err))
+	}
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("%d件のPixelが正常に登録されました", len(pixels)))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("複数Pixel登録に失敗しました: %s", resp.Message))
+	}
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {

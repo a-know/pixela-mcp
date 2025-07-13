@@ -445,6 +445,50 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
+			{
+				"name":        "batch_post_pixels",
+				"description": "Pixelaで特定のグラフに複数のPixelを一度に登録します（Pixelaサポーター限定API。通常ユーザーは25%の確率でリクエストが拒否されます）",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+						"pixels": map[string]interface{}{
+							"type":        "array",
+							"description": "登録するPixelの配列（各要素はdate, quantity, optionalData）",
+							"items": map[string]interface{}{
+								"type": "object",
+								"properties": map[string]interface{}{
+									"date": map[string]interface{}{
+										"type":        "string",
+										"description": "日付（yyyyMMdd形式）",
+									},
+									"quantity": map[string]interface{}{
+										"type":        "string",
+										"description": "数量",
+									},
+									"optionalData": map[string]interface{}{
+										"type":        "string",
+										"description": "オプションデータ（任意）",
+									},
+								},
+								"required": []string{"date", "quantity"},
+							},
+						},
+					},
+					"required": []string{"username", "token", "graphID", "pixels"},
+				},
+			},
 		},
 	}
 }

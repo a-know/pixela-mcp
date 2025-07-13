@@ -240,6 +240,37 @@ func (c *Client) PostPixel(username, token, graphID string, req PostPixelRequest
 	return c.parseResponse(resp)
 }
 
+// 複数Pixel一括登録用リクエスト
+// https://docs.pixe.la/entry/post-pixels
+// POST /v1/users/<username>/graphs/<graphID>/pixels
+
+func (c *Client) BatchPostPixels(username, token, graphID string, pixels []PostPixelRequest) (*PixelaResponse, error) {
+	jsonData, err := json.Marshal(pixels)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/pixels", c.BaseURL, username, graphID),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to post pixels: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) DeleteUser(username, token string) (*PixelaResponse, error) {
 	httpReq, err := http.NewRequest(
 		"DELETE",
