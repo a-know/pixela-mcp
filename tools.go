@@ -95,22 +95,22 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 func (s *MCPServer) handleCreateUser(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	agreeTermsOfService, ok := args["agreeTermsOfService"].(string)
 	if !ok {
-		return s.createErrorResult("agreeTermsOfServiceパラメータが必要です")
+		return s.createErrorResult("agreeTermsOfService parameter is required")
 	}
 
 	notMinor, ok := args["notMinor"].(string)
 	if !ok {
-		return s.createErrorResult("notMinorパラメータが必要です")
+		return s.createErrorResult("notMinor parameter is required")
 	}
 
 	req := pixela.CreateUserRequest{
@@ -122,50 +122,50 @@ func (s *MCPServer) handleCreateUser(client *pixela.Client, args map[string]inte
 
 	resp, err := client.CreateUser(req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ユーザー作成に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to create user: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' が正常に作成されました", username))
+		return s.createSuccessResult(fmt.Sprintf("User '%s' was created successfully", username))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ユーザー作成に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to create user: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleCreateGraph(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	name, ok := args["name"].(string)
 	if !ok {
-		return s.createErrorResult("nameパラメータが必要です")
+		return s.createErrorResult("name parameter is required")
 	}
 
 	unit, ok := args["unit"].(string)
 	if !ok {
-		return s.createErrorResult("unitパラメータが必要です")
+		return s.createErrorResult("unit parameter is required")
 	}
 
 	graphType, ok := args["type"].(string)
 	if !ok {
-		return s.createErrorResult("typeパラメータが必要です")
+		return s.createErrorResult("type parameter is required")
 	}
 
 	color, ok := args["color"].(string)
 	if !ok {
-		return s.createErrorResult("colorパラメータが必要です")
+		return s.createErrorResult("color parameter is required")
 	}
 
 	req := pixela.CreateGraphRequest{
@@ -178,30 +178,30 @@ func (s *MCPServer) handleCreateGraph(client *pixela.Client, args map[string]int
 
 	resp, err := client.CreateGraph(username, token, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ作成に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to create graph: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に作成されました", name))
+		return s.createSuccessResult(fmt.Sprintf("Graph '%s' was created successfully", name))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("グラフ作成に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to create graph: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handlePostPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	date, ok := args["date"].(string)
@@ -212,7 +212,7 @@ func (s *MCPServer) handlePostPixel(client *pixela.Client, args map[string]inter
 
 	quantity, ok := args["quantity"].(string)
 	if !ok {
-		return s.createErrorResult("quantityパラメータが必要です")
+		return s.createErrorResult("quantity parameter is required")
 	}
 
 	req := pixela.PostPixelRequest{
@@ -222,25 +222,25 @@ func (s *MCPServer) handlePostPixel(client *pixela.Client, args map[string]inter
 
 	resp, err := client.PostPixel(username, token, graphID, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセル投稿に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to post pixel: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ピクセルが正常に投稿されました (日付: %s, 数量: %s)", date, quantity))
+		return s.createSuccessResult(fmt.Sprintf("Pixel was posted successfully (date: %s, quantity: %s)", date, quantity))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ピクセル投稿に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to post pixel: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleDeleteUser(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	// デバッグログを追加
@@ -249,32 +249,32 @@ func (s *MCPServer) handleDeleteUser(client *pixela.Client, args map[string]inte
 	resp, err := client.DeleteUser(username, token)
 	if err != nil {
 		fmt.Printf("DEBUG: Error deleting user: %v\n", err)
-		return s.createErrorResult(fmt.Sprintf("ユーザー削除に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete user: %v", err))
 	}
 
 	fmt.Printf("DEBUG: Pixela API response: %+v\n", resp)
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' が正常に削除されました", username))
+		return s.createSuccessResult(fmt.Sprintf("User '%s' was deleted successfully", username))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ユーザー削除に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete user: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleUpdateUser(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	newToken, ok := args["newToken"].(string)
 	if !ok {
-		return s.createErrorResult("newTokenパラメータが必要です")
+		return s.createErrorResult("newToken parameter is required")
 	}
 
 	// thanksCodeはオプショナル
@@ -287,25 +287,25 @@ func (s *MCPServer) handleUpdateUser(client *pixela.Client, args map[string]inte
 
 	resp, err := client.UpdateUser(username, token, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ユーザー更新に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to update user: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' の情報が正常に更新されました", username))
+		return s.createSuccessResult(fmt.Sprintf("User '%s' information was updated successfully", username))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ユーザー更新に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to update user: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleUpdateUserProfile(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	// プロフィール更新のパラメータはすべてオプショナル
@@ -329,45 +329,45 @@ func (s *MCPServer) handleUpdateUserProfile(client *pixela.Client, args map[stri
 
 	resp, err := client.UpdateUserProfile(username, token, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ユーザープロフィール更新に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to update user profile: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' のプロフィールが正常に更新されました", username))
+		return s.createSuccessResult(fmt.Sprintf("User '%s' profile was updated successfully", username))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ユーザープロフィール更新に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to update user profile: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleGetGraphs(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	resp, err := client.GetGraphs(username, token)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ定義一覧取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get graph definitions: %v", err))
 	}
 
 	if len(resp.Graphs) == 0 {
-		return s.createSuccessResult(fmt.Sprintf("ユーザー '%s' のグラフは見つかりませんでした", username))
+		return s.createSuccessResult(fmt.Sprintf("No graphs found for user '%s'", username))
 	}
 
 	// グラフ一覧を整形して返す
 	var graphList []string
 	for _, graph := range resp.Graphs {
-		graphInfo := fmt.Sprintf("ID: %s, 名前: %s, 単位: %s, タイプ: %s, 色: %s",
+		graphInfo := fmt.Sprintf("ID: %s, Name: %s, Unit: %s, Type: %s, Color: %s",
 			graph.ID, graph.Name, graph.Unit, graph.Type, graph.Color)
 		graphList = append(graphList, graphInfo)
 	}
 
-	message := fmt.Sprintf("ユーザー '%s' のグラフ一覧（%d件）:\n%s",
+	message := fmt.Sprintf("Graph list for user '%s' (%d items):\n%s",
 		username, len(resp.Graphs), strings.Join(graphList, "\n"))
 
 	return s.createSuccessResult(message)
@@ -376,22 +376,22 @@ func (s *MCPServer) handleGetGraphs(client *pixela.Client, args map[string]inter
 func (s *MCPServer) handleGetGraphDefinition(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	graph, err := client.GetGraphDefinition(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ定義の取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get graph definition: %v", err))
 	}
 
 	graphData := map[string]interface{}{
@@ -406,23 +406,23 @@ func (s *MCPServer) handleGetGraphDefinition(client *pixela.Client, args map[str
 		"publishOptionalData": bool(graph.PublishOptionalData),
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("グラフ定義を取得しました: %s", graph.Name), graphData)
+	return s.createSuccessResult(fmt.Sprintf("Graph definition retrieved: %s", graph.Name), graphData)
 }
 
 func (s *MCPServer) handleUpdateGraph(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	req := pixela.UpdateGraphRequest{}
@@ -452,58 +452,58 @@ func (s *MCPServer) handleUpdateGraph(client *pixela.Client, args map[string]int
 
 	resp, err := client.UpdateGraph(username, token, graphID, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ更新に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to update graph: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に更新されました", graphID))
+		return s.createSuccessResult(fmt.Sprintf("Graph '%s' was updated successfully", graphID))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("グラフ更新に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to update graph: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleDeleteGraph(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	resp, err := client.DeleteGraph(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ削除に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete graph: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に削除されました", graphID))
+		return s.createSuccessResult(fmt.Sprintf("Graph '%s' was deleted successfully", graphID))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("グラフ削除に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete graph: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	var from, to, withBody *string
@@ -519,13 +519,13 @@ func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]inter
 
 	pixels, err := client.GetPixels(username, token, graphID, from, to, withBody)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセル一覧の取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get pixel list: %v", err))
 	}
 
 	// withBodyがtrueなら詳細配列、そうでなければ日付配列
 	if withBody != nil && *withBody == "true" {
 		if len(pixels.Pixels.Details) == 0 {
-			return s.createSuccessResult(fmt.Sprintf("グラフ '%s' にはピクセルが登録されていません", graphID))
+			return s.createSuccessResult(fmt.Sprintf("No pixels found for graph '%s'", graphID))
 		}
 		var pixelList []map[string]interface{}
 		for _, detail := range pixels.Pixels.Details {
@@ -538,10 +538,10 @@ func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]inter
 			}
 			pixelList = append(pixelList, pixelData)
 		}
-		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' のピクセル詳細一覧（%d件）を取得しました", graphID, len(pixelList)), pixelList)
+		return s.createSuccessResult(fmt.Sprintf("Retrieved pixel details list for graph '%s' (%d items)", graphID, len(pixelList)), pixelList)
 	} else {
 		if len(pixels.Pixels.Dates) == 0 {
-			return s.createSuccessResult(fmt.Sprintf("グラフ '%s' にはピクセルが登録されていません", graphID))
+			return s.createSuccessResult(fmt.Sprintf("No pixels found for graph '%s'", graphID))
 		}
 		var pixelList []map[string]interface{}
 		for _, date := range pixels.Pixels.Dates {
@@ -550,29 +550,29 @@ func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]inter
 			}
 			pixelList = append(pixelList, pixelData)
 		}
-		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' のピクセル一覧（%d件）を取得しました", graphID, len(pixelList)), pixelList)
+		return s.createSuccessResult(fmt.Sprintf("Retrieved pixel list for graph '%s' (%d items)", graphID, len(pixelList)), pixelList)
 	}
 }
 
 func (s *MCPServer) handleGetGraphStats(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	stats, err := client.GetGraphStats(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("グラフ統計情報の取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get graph statistics: %v", err))
 	}
 
 	statsData := map[string]interface{}{
@@ -587,37 +587,37 @@ func (s *MCPServer) handleGetGraphStats(client *pixela.Client, args map[string]i
 		"yesterdayQuantity": stats.YesterdayQuantity.String(),
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の統計情報を取得しました", graphID), statsData)
+	return s.createSuccessResult(fmt.Sprintf("Graph '%s' statistics retrieved", graphID), statsData)
 }
 
 func (s *MCPServer) handleBatchPostPixels(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 	pixelsRaw, ok := args["pixels"].([]interface{})
 	if !ok || len(pixelsRaw) == 0 {
-		return s.createErrorResult("pixels配列パラメータが必要です")
+		return s.createErrorResult("pixels array parameter is required")
 	}
 	var pixels []pixela.PostPixelRequest
 	for _, p := range pixelsRaw {
 		m, ok := p.(map[string]interface{})
 		if !ok {
-			return s.createErrorResult("pixels配列の要素が不正です")
+			return s.createErrorResult("elements in pixels array are invalid")
 		}
 		date, _ := m["date"].(string)
 		quantity, _ := m["quantity"].(string)
 		optionalData, _ := m["optionalData"].(string)
 		if date == "" || quantity == "" {
-			return s.createErrorResult("pixels配列の各要素にはdate, quantityが必要です")
+			return s.createErrorResult("each element in pixels array requires date and quantity")
 		}
 		pixels = append(pixels, pixela.PostPixelRequest{
 			Date:         date,
@@ -627,36 +627,36 @@ func (s *MCPServer) handleBatchPostPixels(client *pixela.Client, args map[string
 	}
 	resp, err := client.BatchPostPixels(username, token, graphID, pixels)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("複数Pixel登録に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to batch post pixels: %v", err))
 	}
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("%d件のPixelが正常に登録されました", len(pixels)))
+		return s.createSuccessResult(fmt.Sprintf("%d pixels were successfully registered", len(pixels)))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("複数Pixel登録に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to batch post pixels: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleGetPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 	date, ok := args["date"].(string)
 	if !ok {
-		return s.createErrorResult("dateパラメータが必要です")
+		return s.createErrorResult("date parameter is required")
 	}
 
 	pixel, err := client.GetPixel(username, token, graphID, date)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("Pixel取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get pixel: %v", err))
 	}
 
 	pixelData := map[string]interface{}{
@@ -667,26 +667,26 @@ func (s *MCPServer) handleGetPixel(client *pixela.Client, args map[string]interf
 		pixelData["optionalData"] = pixel.OptionalData
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("日付 %s のPixelを取得しました", date), pixelData)
+	return s.createSuccessResult(fmt.Sprintf("Pixel for date %s retrieved", date), pixelData)
 }
 
 func (s *MCPServer) handleGetLatestPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	pixel, err := client.GetLatestPixel(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("最新Pixel取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get latest pixel: %v", err))
 	}
 
 	pixelData := map[string]interface{}{
@@ -697,21 +697,21 @@ func (s *MCPServer) handleGetLatestPixel(client *pixela.Client, args map[string]
 		pixelData["optionalData"] = pixel.OptionalData
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の最新Pixel（日付: %s）を取得しました", graphID, pixel.Date), pixelData)
+	return s.createSuccessResult(fmt.Sprintf("Latest pixel for graph '%s' (date: %s) retrieved", graphID, pixel.Date), pixelData)
 }
 
 func (s *MCPServer) handleGetTodayPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	var returnEmpty *bool
@@ -727,7 +727,7 @@ func (s *MCPServer) handleGetTodayPixel(client *pixela.Client, args map[string]i
 
 	pixel, err := client.GetTodayPixel(username, token, graphID, returnEmpty)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("今日のPixel取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get today's pixel: %v", err))
 	}
 
 	pixelData := map[string]interface{}{
@@ -738,33 +738,33 @@ func (s *MCPServer) handleGetTodayPixel(client *pixela.Client, args map[string]i
 		pixelData["optionalData"] = pixel.OptionalData
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の今日のPixel（日付: %s）を取得しました", graphID, pixel.Date), pixelData)
+	return s.createSuccessResult(fmt.Sprintf("Today's pixel for graph '%s' (date: %s) retrieved", graphID, pixel.Date), pixelData)
 }
 
 func (s *MCPServer) handleUpdatePixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	date, ok := args["date"].(string)
 	if !ok {
-		return s.createErrorResult("dateパラメータが必要です")
+		return s.createErrorResult("date parameter is required")
 	}
 
 	quantity, ok := args["quantity"].(string)
 	if !ok {
-		return s.createErrorResult("quantityパラメータが必要です")
+		return s.createErrorResult("quantity parameter is required")
 	}
 
 	req := pixela.UpdatePixelRequest{
@@ -777,124 +777,124 @@ func (s *MCPServer) handleUpdatePixel(client *pixela.Client, args map[string]int
 
 	resp, err := client.UpdatePixel(username, token, graphID, date, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセル更新に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to update pixel: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ピクセル（%s）が正常に更新されました", date))
+		return s.createSuccessResult(fmt.Sprintf("Pixel (%s) updated successfully", date))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ピクセル更新に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to update pixel: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleDeletePixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	date, ok := args["date"].(string)
 	if !ok {
-		return s.createErrorResult("dateパラメータが必要です")
+		return s.createErrorResult("date parameter is required")
 	}
 
 	resp, err := client.DeletePixel(username, token, graphID, date)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセル削除に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete pixel: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("ピクセル（%s）が正常に削除されました", date))
+		return s.createSuccessResult(fmt.Sprintf("Pixel (%s) deleted successfully", date))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ピクセル削除に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete pixel: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleIncrementPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	resp, err := client.IncrementPixel(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセルインクリメントに失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to increment pixel: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult("今日のピクセルが正常にインクリメントされました")
+		return s.createSuccessResult("Today's pixel incremented successfully")
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ピクセルインクリメントに失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to increment pixel: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleDecrementPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	resp, err := client.DecrementPixel(username, token, graphID)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("ピクセルデクリメントに失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to decrement pixel: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult("今日のピクセルが正常にデクリメントされました")
+		return s.createSuccessResult("Today's pixel decremented successfully")
 	} else {
-		return s.createErrorResult(fmt.Sprintf("ピクセルデクリメントに失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to decrement pixel: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleCreateWebhook(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	graphID, ok := args["graphID"].(string)
 	if !ok {
-		return s.createErrorResult("graphIDパラメータが必要です")
+		return s.createErrorResult("graphID parameter is required")
 	}
 
 	webhookType, ok := args["type"].(string)
 	if !ok {
-		return s.createErrorResult("typeパラメータが必要です")
+		return s.createErrorResult("type parameter is required")
 	}
 
 	req := pixela.CreateWebhookRequest{
@@ -908,7 +908,7 @@ func (s *MCPServer) handleCreateWebhook(client *pixela.Client, args map[string]i
 
 	webhook, err := client.CreateWebhook(username, token, req)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("Webhook作成に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to create webhook: %v", err))
 	}
 
 	webhookData := map[string]interface{}{
@@ -920,23 +920,23 @@ func (s *MCPServer) handleCreateWebhook(client *pixela.Client, args map[string]i
 		webhookData["quantity"] = webhook.Quantity
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("Webhookが正常に作成されました（webhookHash: %s）", webhook.WebhookHash), webhookData)
+	return s.createSuccessResult(fmt.Sprintf("Webhook created successfully (webhookHash: %s)", webhook.WebhookHash), webhookData)
 }
 
 func (s *MCPServer) handleGetWebhooks(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 
 	webhooksResponse, err := client.GetWebhooks(username, token)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("Webhook一覧取得に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to get webhook list: %v", err))
 	}
 
 	var webhooksData []map[string]interface{}
@@ -952,53 +952,53 @@ func (s *MCPServer) handleGetWebhooks(client *pixela.Client, args map[string]int
 		webhooksData = append(webhooksData, webhookData)
 	}
 
-	return s.createSuccessResult(fmt.Sprintf("%d件のWebhookを取得しました", len(webhooksResponse.Webhooks)), webhooksData)
+	return s.createSuccessResult(fmt.Sprintf("%d webhooks retrieved", len(webhooksResponse.Webhooks)), webhooksData)
 }
 
 func (s *MCPServer) handleInvokeWebhook(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 
 	webhookHash, ok := args["webhookHash"].(string)
 	if !ok {
-		return s.createErrorResult("webhookHashパラメータが必要です")
+		return s.createErrorResult("webhookHash parameter is required")
 	}
 
 	resp, err := client.InvokeWebhook(username, webhookHash)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("Webhookの実行に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to invoke webhook: %v", err))
 	}
 
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' が正常に実行されました", webhookHash))
+		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' executed successfully", webhookHash))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("Webhookの実行に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to invoke webhook: %s", resp.Message))
 	}
 }
 
 func (s *MCPServer) handleDeleteWebhook(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
 	username, ok := args["username"].(string)
 	if !ok {
-		return s.createErrorResult("usernameパラメータが必要です")
+		return s.createErrorResult("username parameter is required")
 	}
 	token, ok := args["token"].(string)
 	if !ok {
-		return s.createErrorResult("tokenパラメータが必要です")
+		return s.createErrorResult("token parameter is required")
 	}
 	webhookHash, ok := args["webhookHash"].(string)
 	if !ok {
-		return s.createErrorResult("webhookHashパラメータが必要です")
+		return s.createErrorResult("webhookHash parameter is required")
 	}
 	resp, err := client.DeleteWebhook(username, token, webhookHash)
 	if err != nil {
-		return s.createErrorResult(fmt.Sprintf("Webhook削除に失敗しました: %v", err))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete webhook: %v", err))
 	}
 	if resp.IsSuccess {
-		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' が正常に削除されました", webhookHash))
+		return s.createSuccessResult(fmt.Sprintf("Webhook '%s' deleted successfully", webhookHash))
 	} else {
-		return s.createErrorResult(fmt.Sprintf("Webhook削除に失敗しました: %s", resp.Message))
+		return s.createErrorResult(fmt.Sprintf("Failed to delete webhook: %s", resp.Message))
 	}
 }
 
@@ -1027,7 +1027,7 @@ func (s *MCPServer) createErrorResult(message string) map[string]interface{} {
 		"content": []map[string]interface{}{
 			{
 				"type": "text",
-				"text": "エラー: " + message,
+				"text": "Error: " + message,
 			},
 		},
 	}
