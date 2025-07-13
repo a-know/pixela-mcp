@@ -74,6 +74,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleDecrementPixel(client, toolCall.Args)
 	case "create_webhook":
 		return s.handleCreateWebhook(client, toolCall.Args)
+	case "get_webhooks":
+		return s.handleGetWebhooks(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -908,6 +910,38 @@ func (s *MCPServer) handleCreateWebhook(client *pixela.Client, args map[string]i
 	}
 
 	return s.createSuccessResult(fmt.Sprintf("Webhookが正常に作成されました（webhookHash: %s）", webhook.WebhookHash), webhookData)
+}
+
+func (s *MCPServer) handleGetWebhooks(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	webhooksResponse, err := client.GetWebhooks(username, token)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("Webhook一覧取得に失敗しました: %v", err))
+	}
+
+	var webhooksData []map[string]interface{}
+	for _, webhook := range webhooksResponse.Webhooks {
+		webhookData := map[string]interface{}{
+			"webhookHash": webhook.WebhookHash,
+			"graphID":     webhook.GraphID,
+			"type":        webhook.Type,
+		}
+		if webhook.Quantity != "" {
+			webhookData["quantity"] = webhook.Quantity
+		}
+		webhooksData = append(webhooksData, webhookData)
+	}
+
+	return s.createSuccessResult(fmt.Sprintf("%d件のWebhookを取得しました", len(webhooksResponse.Webhooks)), webhooksData)
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {

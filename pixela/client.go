@@ -548,6 +548,37 @@ func (c *Client) CreateWebhook(username, token string, req CreateWebhookRequest)
 	return &webhook, nil
 }
 
+func (c *Client) GetWebhooks(username, token string) (*GetWebhooksResponse, error) {
+	httpReq, err := http.NewRequest(
+		"GET",
+		fmt.Sprintf("%s/v1/users/%s/webhooks", c.BaseURL, username),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get webhooks: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get webhooks: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var webhooksResponse GetWebhooksResponse
+	if err := json.NewDecoder(resp.Body).Decode(&webhooksResponse); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &webhooksResponse, nil
+}
+
 func (c *Client) UpdateUser(username, token string, req UpdateUserRequest) (*PixelaResponse, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
