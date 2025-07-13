@@ -18,19 +18,19 @@ type ToolCallResult struct {
 }
 
 func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
-	// パラメータをマップに変換
+	// Convert parameters to map
 	paramsMap, ok := params.(map[string]interface{})
 	if !ok {
 		return s.createErrorResult("Invalid parameters")
 	}
 
-	// ツール名を取得
+	// Get tool name
 	toolName, ok := paramsMap["name"].(string)
 	if !ok {
 		return s.createErrorResult("Tool name not found")
 	}
 
-	// ツールの引数を取得
+	// Get tool arguments
 	arguments, ok := paramsMap["arguments"].(map[string]interface{})
 	if !ok {
 		return s.createErrorResult("Arguments not found")
@@ -206,7 +206,7 @@ func (s *MCPServer) handlePostPixel(client *pixela.Client, args map[string]inter
 
 	date, ok := args["date"].(string)
 	if !ok {
-		// 日付が指定されていない場合は今日の日付を使用
+		// If date is not specified, use today's date
 		date = time.Now().Format("20060102")
 	}
 
@@ -243,7 +243,7 @@ func (s *MCPServer) handleDeleteUser(client *pixela.Client, args map[string]inte
 		return s.createErrorResult("token parameter is required")
 	}
 
-	// デバッグログを追加
+	// Add debug log
 	fmt.Printf("DEBUG: Deleting user '%s' with token '%s'\n", username, token)
 
 	resp, err := client.DeleteUser(username, token)
@@ -277,7 +277,7 @@ func (s *MCPServer) handleUpdateUser(client *pixela.Client, args map[string]inte
 		return s.createErrorResult("newToken parameter is required")
 	}
 
-	// thanksCodeはオプショナル
+	// thanksCode is optional
 	thanksCode, _ := args["thanksCode"].(string)
 
 	req := pixela.UpdateUserRequest{
@@ -308,7 +308,7 @@ func (s *MCPServer) handleUpdateUserProfile(client *pixela.Client, args map[stri
 		return s.createErrorResult("token parameter is required")
 	}
 
-	// プロフィール更新のパラメータはすべてオプショナル
+	// All profile update parameters are optional
 	displayName, _ := args["displayName"].(string)
 	profileURL, _ := args["profileURL"].(string)
 	description, _ := args["description"].(string)
@@ -359,7 +359,7 @@ func (s *MCPServer) handleGetGraphs(client *pixela.Client, args map[string]inter
 		return s.createSuccessResult(fmt.Sprintf("No graphs found for user '%s'", username))
 	}
 
-	// グラフ一覧を整形して返す
+	// Format graph list for return
 	var graphList []string
 	for _, graph := range resp.Graphs {
 		graphInfo := fmt.Sprintf("ID: %s, Name: %s, Unit: %s, Type: %s, Color: %s",
@@ -427,7 +427,7 @@ func (s *MCPServer) handleUpdateGraph(client *pixela.Client, args map[string]int
 
 	req := pixela.UpdateGraphRequest{}
 
-	// オプションパラメータを設定
+	// Set optional parameters
 	if name, ok := args["name"].(string); ok {
 		req.Name = name
 	}
@@ -522,7 +522,7 @@ func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]inter
 		return s.createErrorResult(fmt.Sprintf("Failed to get pixel list: %v", err))
 	}
 
-	// withBodyがtrueなら詳細配列、そうでなければ日付配列
+	// If withBody is true, return detailed array, otherwise return date array
 	if withBody != nil && *withBody == "true" {
 		if len(pixels.Pixels.Details) == 0 {
 			return s.createSuccessResult(fmt.Sprintf("No pixels found for graph '%s'", graphID))
