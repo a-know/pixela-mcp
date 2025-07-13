@@ -52,6 +52,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleUpdateGraph(client, toolCall.Args)
 	case "delete_graph":
 		return s.handleDeleteGraph(client, toolCall.Args)
+	case "get_pixels":
+		return s.handleGetPixels(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -452,6 +454,70 @@ func (s *MCPServer) handleDeleteGraph(client *pixela.Client, args map[string]int
 		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' が正常に削除されました", graphID))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("グラフ削除に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleGetPixels(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	var from, to, withBody *string
+	if v, ok := args["from"].(string); ok {
+		from = &v
+	}
+	if v, ok := args["to"].(string); ok {
+		to = &v
+	}
+	if v, ok := args["withBody"].(string); ok {
+		withBody = &v
+	}
+
+	pixels, err := client.GetPixels(username, token, graphID, from, to, withBody)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ピクセル一覧の取得に失敗しました: %v", err))
+	}
+
+	// withBodyがtrueなら詳細配列、そうでなければ日付配列
+	if withBody != nil && *withBody == "true" {
+		if len(pixels.Pixels.Details) == 0 {
+			return s.createSuccessResult(fmt.Sprintf("グラフ '%s' にはピクセルが登録されていません", graphID))
+		}
+		var pixelList []map[string]interface{}
+		for _, detail := range pixels.Pixels.Details {
+			pixelData := map[string]interface{}{
+				"date":     detail.Date,
+				"quantity": detail.Quantity,
+			}
+			if detail.OptionalData != "" {
+				pixelData["optionalData"] = detail.OptionalData
+			}
+			pixelList = append(pixelList, pixelData)
+		}
+		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' のピクセル詳細一覧（%d件）を取得しました", graphID, len(pixelList)), pixelList)
+	} else {
+		if len(pixels.Pixels.Dates) == 0 {
+			return s.createSuccessResult(fmt.Sprintf("グラフ '%s' にはピクセルが登録されていません", graphID))
+		}
+		var pixelList []map[string]interface{}
+		for _, date := range pixels.Pixels.Dates {
+			pixelData := map[string]interface{}{
+				"date": date,
+			}
+			pixelList = append(pixelList, pixelData)
+		}
+		return s.createSuccessResult(fmt.Sprintf("グラフ '%s' のピクセル一覧（%d件）を取得しました", graphID, len(pixelList)), pixelList)
 	}
 }
 

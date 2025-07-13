@@ -389,6 +389,40 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID"},
 				},
 			},
+			{
+				"name":        "get_pixels",
+				"description": "Pixelaで特定のグラフのピクセル一覧を取得します",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "ユーザー名",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "認証トークン",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "グラフID",
+						},
+						"from": map[string]interface{}{
+							"type":        "string",
+							"description": "取得開始日（yyyyMMdd、オプション）",
+						},
+						"to": map[string]interface{}{
+							"type":        "string",
+							"description": "取得終了日（yyyyMMdd、オプション）",
+						},
+						"withBody": map[string]interface{}{
+							"type":        "string",
+							"description": "ピクセル詳細情報も含めるか（\"true\"/\"false\"、オプション）",
+						},
+					},
+					"required": []string{"username", "token", "graphID"},
+				},
+			},
 		},
 	}
 }

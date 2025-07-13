@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -66,6 +67,43 @@ type UpdateGraphRequest struct {
 	SelfSufficient      string `json:"selfSufficient,omitempty"`
 	IsSecret            string `json:"isSecret,omitempty"`
 	PublishOptionalData string `json:"publishOptionalData,omitempty"`
+}
+
+type Pixel struct {
+	Date         string `json:"date"`
+	Quantity     string `json:"quantity"`
+	OptionalData string `json:"optionalData,omitempty"`
+}
+
+type PixelDetail struct {
+	Date         string `json:"date"`
+	Quantity     string `json:"quantity"`
+	OptionalData string `json:"optionalData,omitempty"`
+}
+
+type PixelList struct {
+	Dates   []string
+	Details []PixelDetail
+}
+
+func (p *PixelList) UnmarshalJSON(data []byte) error {
+	// まずstring配列として試す
+	var dates []string
+	if err := json.Unmarshal(data, &dates); err == nil {
+		p.Dates = dates
+		return nil
+	}
+	// 次にPixelDetail配列として試す
+	var details []PixelDetail
+	if err := json.Unmarshal(data, &details); err == nil {
+		p.Details = details
+		return nil
+	}
+	return fmt.Errorf("pixelsフィールドの型が不正です: %s", string(data))
+}
+
+type GetPixelsResponse struct {
+	Pixels PixelList `json:"pixels"`
 }
 
 type BoolString bool
@@ -311,6 +349,54 @@ func (c *Client) DeleteGraph(username, token, graphID string) (*PixelaResponse, 
 	defer resp.Body.Close()
 
 	return c.parseResponse(resp)
+}
+
+func (c *Client) GetPixels(username, token, graphID string, from, to, withBody *string) (*GetPixelsResponse, error) {
+	baseURL := fmt.Sprintf("%s/v1/users/%s/graphs/%s/pixels", c.BaseURL, username, graphID)
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse url: %w", err)
+	}
+	q := u.Query()
+	if from != nil && *from != "" {
+		q.Set("from", *from)
+	}
+	if to != nil && *to != "" {
+		q.Set("to", *to)
+	}
+	if withBody != nil && *withBody != "" {
+		q.Set("withBody", *withBody)
+	}
+	u.RawQuery = q.Encode()
+
+	httpReq, err := http.NewRequest(
+		"GET",
+		u.String(),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pixels: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("failed to get pixels: status %d, body: %s", resp.StatusCode, string(body))
+	}
+
+	var pixelsResp GetPixelsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&pixelsResp); err != nil {
+		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	return &pixelsResp, nil
 }
 
 func (c *Client) GetGraphs(username, token string) (*GetGraphsResponse, error) {
