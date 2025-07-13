@@ -62,6 +62,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetPixel(client, toolCall.Args)
 	case "get_latest_pixel":
 		return s.handleGetLatestPixel(client, toolCall.Args)
+	case "get_today_pixel":
+		return s.handleGetTodayPixel(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -673,6 +675,47 @@ func (s *MCPServer) handleGetLatestPixel(client *pixela.Client, args map[string]
 	}
 
 	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の最新Pixel（日付: %s）を取得しました", graphID, pixel.Date), pixelData)
+}
+
+func (s *MCPServer) handleGetTodayPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	var returnEmpty *bool
+	if v, ok := args["returnEmpty"].(string); ok {
+		if v == "true" {
+			trueVal := true
+			returnEmpty = &trueVal
+		} else if v == "false" {
+			falseVal := false
+			returnEmpty = &falseVal
+		}
+	}
+
+	pixel, err := client.GetTodayPixel(username, token, graphID, returnEmpty)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("今日のPixel取得に失敗しました: %v", err))
+	}
+
+	pixelData := map[string]interface{}{
+		"date":     pixel.Date,
+		"quantity": pixel.Quantity,
+	}
+	if pixel.OptionalData != "" {
+		pixelData["optionalData"] = pixel.OptionalData
+	}
+
+	return s.createSuccessResult(fmt.Sprintf("グラフ '%s' の今日のPixel（日付: %s）を取得しました", graphID, pixel.Date), pixelData)
 }
 
 func (s *MCPServer) createSuccessResult(message string, data ...interface{}) map[string]interface{} {
