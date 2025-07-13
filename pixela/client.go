@@ -829,12 +829,33 @@ func (c *Client) GetGraph(username, graphID string) (string, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("failed to get graph: status %d", resp.StatusCode)
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	return string(body), nil
+}
+
+func (c *Client) InvokeWebhook(username, webhookHash string) (*PixelaResponse, error) {
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/users/%s/webhooks/%s", c.BaseURL, username, webhookHash), nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Length", "0")
+
+	resp, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to invoke webhook: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
 }
 
 func (c *Client) parseResponse(resp *http.Response) (*PixelaResponse, error) {
