@@ -70,6 +70,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleDeletePixel(client, toolCall.Args)
 	case "increment_pixel":
 		return s.handleIncrementPixel(client, toolCall.Args)
+	case "decrement_pixel":
+		return s.handleDecrementPixel(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -828,6 +830,34 @@ func (s *MCPServer) handleIncrementPixel(client *pixela.Client, args map[string]
 		return s.createSuccessResult("今日のピクセルが正常にインクリメントされました")
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ピクセルインクリメントに失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleDecrementPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	resp, err := client.DecrementPixel(username, token, graphID)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ピクセルデクリメントに失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult("今日のピクセルが正常にデクリメントされました")
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ピクセルデクリメントに失敗しました: %s", resp.Message))
 	}
 }
 

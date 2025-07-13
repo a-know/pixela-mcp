@@ -472,6 +472,28 @@ func (c *Client) IncrementPixel(username, token, graphID string) (*PixelaRespons
 	return c.parseResponse(resp)
 }
 
+func (c *Client) DecrementPixel(username, token, graphID string) (*PixelaResponse, error) {
+	httpReq, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/decrement", c.BaseURL, username, graphID),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+	httpReq.Header.Set("Content-Length", "0")
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decrement pixel: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) UpdateUser(username, token string, req UpdateUserRequest) (*PixelaResponse, error) {
 	jsonData, err := json.Marshal(req)
 	if err != nil {
