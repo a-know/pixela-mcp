@@ -66,6 +66,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleGetTodayPixel(client, toolCall.Args)
 	case "update_pixel":
 		return s.handleUpdatePixel(client, toolCall.Args)
+	case "delete_pixel":
+		return s.handleDeletePixel(client, toolCall.Args)
 	default:
 		return s.createErrorResult(fmt.Sprintf("未知のツール: %s", toolCall.Name))
 	}
@@ -763,6 +765,39 @@ func (s *MCPServer) handleUpdatePixel(client *pixela.Client, args map[string]int
 		return s.createSuccessResult(fmt.Sprintf("ピクセル（%s）が正常に更新されました", date))
 	} else {
 		return s.createErrorResult(fmt.Sprintf("ピクセル更新に失敗しました: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleDeletePixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("usernameパラメータが必要です")
+	}
+
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("tokenパラメータが必要です")
+	}
+
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphIDパラメータが必要です")
+	}
+
+	date, ok := args["date"].(string)
+	if !ok {
+		return s.createErrorResult("dateパラメータが必要です")
+	}
+
+	resp, err := client.DeletePixel(username, token, graphID, date)
+	if err != nil {
+		return s.createErrorResult(fmt.Sprintf("ピクセル削除に失敗しました: %v", err))
+	}
+
+	if resp.IsSuccess {
+		return s.createSuccessResult(fmt.Sprintf("ピクセル（%s）が正常に削除されました", date))
+	} else {
+		return s.createErrorResult(fmt.Sprintf("ピクセル削除に失敗しました: %s", resp.Message))
 	}
 }
 
