@@ -784,6 +784,32 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID", "quantity"},
 				},
 			},
+			{
+				"name":        "subtract_pixel",
+				"description": "Subtract a value from today's pixel on a specific graph on Pixela",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "User name",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "Authentication token",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "Graph ID",
+						},
+						"quantity": map[string]interface{}{
+							"type":        "string",
+							"description": "Value to subtract (string, required)",
+						},
+					},
+					"required": []string{"username", "token", "graphID", "quantity"},
+				},
+			},
 		},
 	}
 }

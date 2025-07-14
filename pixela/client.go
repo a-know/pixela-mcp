@@ -907,6 +907,34 @@ func (c *Client) AddPixel(username, token, graphID, quantity string) (*PixelaRes
 	return c.parseResponse(resp)
 }
 
+func (c *Client) SubtractPixel(username, token, graphID, quantity string) (*PixelaResponse, error) {
+	reqBody := map[string]string{"quantity": quantity}
+	jsonData, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal request: %w", err)
+	}
+
+	httpReq, err := http.NewRequest(
+		"PUT",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/subtract", c.BaseURL, username, graphID),
+		bytes.NewBuffer(jsonData),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("X-USER-TOKEN", token)
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to subtract pixel: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) parseResponse(resp *http.Response) (*PixelaResponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

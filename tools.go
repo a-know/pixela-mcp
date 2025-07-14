@@ -89,6 +89,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleDeleteWebhook(client, arguments)
 	case "add_pixel":
 		return s.handleAddPixel(client, arguments)
+	case "subtract_pixel":
+		return s.handleSubtractPixel(client, arguments)
 	default:
 		return s.createErrorResult(fmt.Sprintf("Unknown tool: %s", toolName))
 	}
@@ -1031,6 +1033,38 @@ func (s *MCPServer) handleAddPixel(client *pixela.Client, args map[string]interf
 		return s.createSuccessResult("Today's pixel added successfully")
 	} else {
 		return s.createErrorResult(fmt.Sprintf("Failed to add pixel: %s", resp.Message))
+	}
+}
+
+func (s *MCPServer) handleSubtractPixel(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("username parameter is required")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("token parameter is required")
+	}
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphID parameter is required")
+	}
+	quantity, ok := args["quantity"].(string)
+	if !ok {
+		return s.createErrorResult("quantity parameter is required")
+	}
+
+	resp, err := client.SubtractPixel(username, token, graphID, quantity)
+	if err != nil {
+		return s.createErrorResult("Failed to subtract pixel: " + err.Error())
+	}
+	if !resp.IsSuccess {
+		return s.createErrorResult(resp.Message)
+	}
+	return map[string]interface{}{
+		"content": []map[string]interface{}{
+			{"type": "text", "text": "Today's pixel subtracted successfully"},
+		},
 	}
 }
 
