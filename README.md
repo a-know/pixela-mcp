@@ -32,6 +32,7 @@ This MCP server supports the following Pixela API operations as tools:
 - **decrement_pixel**: Decrement today's pixel
 - **add_pixel**: Add a value to today's pixel (Pixela Instant recording `/add` endpoint)
 - **subtract_pixel**: Subtract a value from today's pixel (Pixela Instant recording `/subtract` endpoint)
+- **stopwatch**: Start or stop the stopwatch for a specific graph (Pixela Instant recording `/stopwatch` endpoint)
 
 ### Webhook Management
 - **create_webhook**: Create a webhook
@@ -190,6 +191,10 @@ or for Docker:
   - `token` (string, required): Authentication token
   - `graphID` (string, required): Graph ID
   - `quantity` (string, required): Value to subtract (as string)
+- **stopwatch**
+  - `username` (string, required): User name
+  - `token` (string, required): Authentication token
+  - `graphID` (string, required): Graph ID
 
 #### Webhook Management
 

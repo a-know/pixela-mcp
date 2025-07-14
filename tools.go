@@ -91,6 +91,8 @@ func (s *MCPServer) handleToolsCall(params interface{}) map[string]interface{} {
 		return s.handleAddPixel(client, arguments)
 	case "subtract_pixel":
 		return s.handleSubtractPixel(client, arguments)
+	case "stopwatch":
+		return s.handleStopwatch(client, arguments)
 	default:
 		return s.createErrorResult(fmt.Sprintf("Unknown tool: %s", toolName))
 	}
@@ -1064,6 +1066,34 @@ func (s *MCPServer) handleSubtractPixel(client *pixela.Client, args map[string]i
 	return map[string]interface{}{
 		"content": []map[string]interface{}{
 			{"type": "text", "text": "Today's pixel subtracted successfully"},
+		},
+	}
+}
+
+func (s *MCPServer) handleStopwatch(client *pixela.Client, args map[string]interface{}) map[string]interface{} {
+	username, ok := args["username"].(string)
+	if !ok {
+		return s.createErrorResult("username parameter is required")
+	}
+	token, ok := args["token"].(string)
+	if !ok {
+		return s.createErrorResult("token parameter is required")
+	}
+	graphID, ok := args["graphID"].(string)
+	if !ok {
+		return s.createErrorResult("graphID parameter is required")
+	}
+
+	resp, err := client.Stopwatch(username, token, graphID)
+	if err != nil {
+		return s.createErrorResult("Failed to call stopwatch: " + err.Error())
+	}
+	if !resp.IsSuccess {
+		return s.createErrorResult(resp.Message)
+	}
+	return map[string]interface{}{
+		"content": []map[string]interface{}{
+			{"type": "text", "text": "Stopwatch API called successfully"},
 		},
 	}
 }

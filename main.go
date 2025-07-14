@@ -810,6 +810,28 @@ func (s *MCPServer) handleToolsList() map[string]interface{} {
 					"required": []string{"username", "token", "graphID", "quantity"},
 				},
 			},
+			{
+				"name":        "stopwatch",
+				"description": "Start or stop the stopwatch for a specific graph on Pixela",
+				"inputSchema": map[string]interface{}{
+					"type": "object",
+					"properties": map[string]interface{}{
+						"username": map[string]interface{}{
+							"type":        "string",
+							"description": "User name",
+						},
+						"token": map[string]interface{}{
+							"type":        "string",
+							"description": "Authentication token",
+						},
+						"graphID": map[string]interface{}{
+							"type":        "string",
+							"description": "Graph ID",
+						},
+					},
+					"required": []string{"username", "token", "graphID"},
+				},
+			},
 		},
 	}
 }

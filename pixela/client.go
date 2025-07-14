@@ -935,6 +935,28 @@ func (c *Client) SubtractPixel(username, token, graphID, quantity string) (*Pixe
 	return c.parseResponse(resp)
 }
 
+func (c *Client) Stopwatch(username, token, graphID string) (*PixelaResponse, error) {
+	httpReq, err := http.NewRequest(
+		"POST",
+		fmt.Sprintf("%s/v1/users/%s/graphs/%s/stopwatch", c.BaseURL, username, graphID),
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	httpReq.Header.Set("X-USER-TOKEN", token)
+	httpReq.Header.Set("Content-Length", "0")
+
+	resp, err := c.HTTPClient.Do(httpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call stopwatch: %w", err)
+	}
+	defer resp.Body.Close()
+
+	return c.parseResponse(resp)
+}
+
 func (c *Client) parseResponse(resp *http.Response) (*PixelaResponse, error) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
