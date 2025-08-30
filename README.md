@@ -92,10 +92,9 @@ or for Docker:
 ```json
 {
   "mcpServers": {
-    "pixela": {
+    "pixela-mcp": {
       "command": "docker",
-      "args": ["run", "--rm", "pixela-mcp"],
-      "cwd": "/path/to/pixela-mcp"
+      "args": ["run", "--rm", "-i", "pixelaapi/pixela-mcp"]
     }
   }
 }
